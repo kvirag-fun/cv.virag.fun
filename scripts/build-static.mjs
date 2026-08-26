@@ -59,6 +59,14 @@ async function capture(urlPath) {
   // Make them document-relative so the site works from any sub-path,
   // e.g. username.github.io/<repo>/.
   html = html.replaceAll("/./assets/", "./assets/");
+  // Normalize literal filenames (unlock.html, index.html) to the real routes
+  // before the router boots — static hosts serve the files as-is.
+  const normalize =
+    "<script>(function(){var p=location.pathname;" +
+    'if(p.endsWith("/unlock.html"))history.replaceState(null,"",p.slice(0,-5)+location.search+location.hash);' +
+    'else if(p.endsWith("/index.html"))history.replaceState(null,"",p.slice(0,-10)+location.search+location.hash);' +
+    "})();</script>";
+  html = html.replace("<head>", "<head>" + normalize);
   return html;
 }
 
