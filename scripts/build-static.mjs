@@ -13,13 +13,37 @@
 // Usage: bun run build:static   (or: node scripts/build-static.mjs)
 
 import { spawn } from "node:child_process";
-import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, cp, mkdir, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
+// GitHub Pages always publishes dist/client (see .github/workflows/deploy.yml).
 const OUT_DIR = path.resolve("dist/client");
+
+async function exists(p) {
+  try {
+    await access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Depending on the Vite/Nitro version the build lands in dist/ or .output/.
+async function resolveBuildDirs() {
+  const candidates = [
+    { server: "dist/server/index.mjs", client: "dist/client" },
+    { server: ".output/server/index.mjs", client: ".output/public" },
+  ];
+  for (const c of candidates) {
+    if (await exists(path.resolve(c.server))) {
+      return { server: path.resolve(c.server), client: path.resolve(c.client) };
+    }
+  }
+  throw new Error("Could not find the built server bundle (dist/server or .output/server).");
+}
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
