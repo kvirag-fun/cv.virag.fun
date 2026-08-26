@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  redirect,
   useRouter,
   HeadContent,
   Scripts,
@@ -73,6 +74,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    // Static hosts may serve the literal filenames (unlock.html, index.html);
+    // normalize them to the real routes.
+    if (location.pathname === "/unlock.html") throw redirect({ to: "/unlock" });
+    if (location.pathname === "/index.html") throw redirect({ to: "/" });
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
