@@ -48,25 +48,21 @@ const SECTIONS: NavSection[] = [
 ];
 
 function CvPage() {
-  const router = useRouter();
   const [unlocked, setUnlocked] = useState<UnlockedCv | null>(null);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const stored = loadUnlocked();
-    if (!stored) {
-      void router.navigate({ to: "/unlock" });
-      return;
-    }
-    setUnlocked(stored);
-  }, [router]);
+    setUnlocked(loadUnlocked());
+    setChecked(true);
+  }, []);
 
   function onLock() {
     clearUnlocked();
-    void router.navigate({ to: "/unlock" });
+    setUnlocked(null);
   }
 
-  // SSR and locked visitors only ever see this neutral placeholder.
-  if (!unlocked) {
+  // SSR pass: neutral placeholder until the browser has checked the session.
+  if (!checked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -74,6 +70,12 @@ function CvPage() {
         </p>
       </div>
     );
+  }
+
+  // Locked visitors get the passphrase screen inline — no navigation, so it
+  // works on any static host, including sub-path GitHub Pages sites.
+  if (!unlocked) {
+    return <UnlockScreen onUnlocked={setUnlocked} />;
   }
 
   const { cv, portraitDataUrl } = unlocked;
