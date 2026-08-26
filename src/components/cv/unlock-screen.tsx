@@ -74,7 +74,10 @@ export function UnlockScreen({ onUnlocked }: { onUnlocked: (value: UnlockedCv) =
               autoFocus
               required
               placeholder="••••••••••••"
-              className="w-full border border-input bg-background px-4 py-3 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-ring/30"
+              // text-base (16px) minimum: iOS Safari auto-zooms the page when
+              // focusing any input below 16px, and that zoom sticks after
+              // unlock and across reloads.
+              className="w-full border border-input bg-background px-4 py-3 font-mono text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-ring/30"
             />
           </label>
 
