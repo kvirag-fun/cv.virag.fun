@@ -13,13 +13,37 @@
 // Usage: bun run build:static   (or: node scripts/build-static.mjs)
 
 import { spawn } from "node:child_process";
-import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, cp, mkdir, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
+// GitHub Pages always publishes dist/client (see .github/workflows/deploy.yml).
 const OUT_DIR = path.resolve("dist/client");
+
+async function exists(p) {
+  try {
+    await access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Depending on the Vite/Nitro version the build lands in dist/ or .output/.
+async function resolveBuildDirs() {
+  const candidates = [
+    { server: "dist/server/index.mjs", client: "dist/client" },
+    { server: ".output/server/index.mjs", client: ".output/public" },
+  ];
+  for (const c of candidates) {
+    if (await exists(path.resolve(c.server))) {
+      return { server: path.resolve(c.server), client: path.resolve(c.client) };
+    }
+  }
+  throw new Error("Could not find the built server bundle (dist/server or .output/server).");
+}
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
@@ -31,8 +55,8 @@ function run(cmd, args) {
 }
 
 // Serve the built server bundle over plain HTTP (GET is all we need).
-async function serveBuild() {
-  const mod = await import(path.resolve("dist/server/index.mjs"));
+async function serveBuild(serverEntry) {
+  const mod = await import(serverEntry);
   const entry = mod.default ?? mod;
   const fetchHandler = typeof entry === "function" ? entry : entry.fetch.bind(entry);
   const server = http.createServer(async (req, res) => {
@@ -83,8 +107,15 @@ await rm(path.resolve("node_modules/.nitro"), { recursive: true, force: true });
 // 2. Production build (client + server bundles)
 await run("bun", ["run", "build"]);
 
-// 3. Serve the build and capture the two routes as HTML
-const server = await serveBuild();
+// 3. Locate the build output (dist/* or .output/*) and serve it
+const dirs = await resolveBuildDirs();
+if (dirs.client !== OUT_DIR) {
+  await rm(OUT_DIR, { recursive: true, force: true });
+  await mkdir(path.dirname(OUT_DIR), { recursive: true });
+  await cp(dirs.client, OUT_DIR, { recursive: true });
+}
+
+const server = await serveBuild(dirs.server);
 try {
   const indexHtml = await capture("/");
 
