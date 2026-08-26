@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import {
   MapPin,
   Mail,
@@ -14,19 +14,17 @@ import {
   Printer,
   ArrowUpRight,
 } from "lucide-react";
-import { getCvContent, lockSite } from "@/lib/gate.functions";
+import { clearUnlocked, loadUnlocked, type UnlockedCv } from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
 import { Reveal } from "@/components/cv/reveal";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
 import { SkillBar } from "@/components/cv/skill-bar";
 import { cn } from "@/lib/utils";
-import portrait from "@/assets/portrait.jpg";
 
-// The loader calls the gated server function: locked visitors are redirected
-// to /unlock before any CV data is produced, and the payload never ships in
-// the client bundle. head() stays generic on purpose — this is a private page.
+// The CV ships only as AES-GCM ciphertext (src/lib/cv-payload.ts). This page
+// renders nothing until the payload is decrypted client-side; locked visitors
+// are sent to /unlock. head() stays generic on purpose — this is private.
 export const Route = createFileRoute("/")({
-  loader: () => getCvContent(),
   head: () => ({
     meta: [
       { title: "Curriculum Vitae — Private" },
@@ -50,14 +48,35 @@ const SECTIONS: NavSection[] = [
 ];
 
 function CvPage() {
-  const cv = Route.useLoaderData();
   const router = useRouter();
-  const lock = useServerFn(lockSite);
+  const [unlocked, setUnlocked] = useState<UnlockedCv | null>(null);
 
-  async function onLock() {
-    await lock({});
-    await router.navigate({ to: "/unlock" });
+  useEffect(() => {
+    const stored = loadUnlocked();
+    if (!stored) {
+      void router.navigate({ to: "/unlock" });
+      return;
+    }
+    setUnlocked(stored);
+  }, [router]);
+
+  function onLock() {
+    clearUnlocked();
+    void router.navigate({ to: "/unlock" });
   }
+
+  // SSR and locked visitors only ever see this neutral placeholder.
+  if (!unlocked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Verifying access…
+        </p>
+      </div>
+    );
+  }
+
+  const { cv, portraitDataUrl } = unlocked;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -74,7 +93,7 @@ function CvPage() {
       </header>
 
       <main className="relative mx-auto max-w-3xl px-5 pb-24 sm:px-8">
-        <Hero cv={cv} />
+        <Hero cv={cv} portraitUrl={portraitDataUrl} />
         <Experience cv={cv} />
         <Skills cv={cv} />
         <Education cv={cv} />
@@ -143,7 +162,7 @@ function SectionHeading({
   );
 }
 
-function Hero({ cv }: { cv: CvData }) {
+function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
   return (
     <section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
       <Reveal>
@@ -184,7 +203,7 @@ function Hero({ cv }: { cv: CvData }) {
         <Reveal delay={180} className="justify-self-center sm:justify-self-end">
           <figure className="corner-ticks p-3">
             <img
-              src={portrait}
+              src={portraitUrl}
               alt={`Portrait of ${cv.name}`}
               width={220}
               height={220}

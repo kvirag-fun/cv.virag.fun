@@ -1,8 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LockKeyhole, Fingerprint, ArrowRight } from "lucide-react";
-import { unlockSite } from "@/lib/gate.functions";
+import { loadUnlocked, saveUnlocked, unlockWithPassphrase } from "@/lib/crypto";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/unlock")({
@@ -18,9 +17,13 @@ export const Route = createFileRoute("/unlock")({
 
 function UnlockPage() {
   const router = useRouter();
-  const unlock = useServerFn(unlockSite);
   const [error, setError] = useState(false);
   const [pending, setPending] = useState(false);
+
+  // Already unlocked in this tab session? Go straight to the document.
+  useEffect(() => {
+    if (loadUnlocked()) void router.navigate({ to: "/" });
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,8 +31,9 @@ function UnlockPage() {
     setError(false);
     try {
       const password = new FormData(e.currentTarget).get("password") as string;
-      const { ok } = await unlock({ data: { password } });
-      if (ok) {
+      const unlocked = await unlockWithPassphrase(password);
+      if (unlocked) {
+        saveUnlocked(unlocked);
         await router.navigate({ to: "/" });
       } else {
         setError(true);
@@ -101,7 +105,7 @@ function UnlockPage() {
             disabled={pending}
             className="group flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 font-mono text-sm font-medium uppercase tracking-[0.15em] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
           >
-            {pending ? "Verifying…" : "Unlock"}
+            {pending ? "Decrypting…" : "Unlock"}
             <ArrowRight
               className="h-4 w-4 transition-transform group-hover:translate-x-1"
               aria-hidden="true"
@@ -110,8 +114,8 @@ function UnlockPage() {
         </form>
       </div>
 
-      <p className="absolute bottom-6 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
-        Access is logged by session only · no account required
+      <p className="absolute bottom-6 px-4 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
+        AES-256 encrypted · the passphrase never leaves your browser
       </p>
     </main>
   );

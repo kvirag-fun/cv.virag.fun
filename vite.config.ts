@@ -12,4 +12,12 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Relative asset URLs so the static build works from any sub-path
+    // (e.g. username.github.io/<repo>/).
+    base: "./",
+  },
+  // Static hosting: `bun run build:static` builds normally, then captures the
+  // rendered pages into dist/client as plain HTML (see scripts/build-static.mjs).
+  // All protection is client-side AES-GCM decryption — no server at runtime.
 });
