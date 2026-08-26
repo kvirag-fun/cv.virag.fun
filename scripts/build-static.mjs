@@ -85,16 +85,16 @@ try {
   // Render at the same base path the browser router will use. Capturing at "/"
   // while the router is configured for "/<repo>" creates mismatched hydration
   // state and crashes with "Invariant failed" on GitHub Pages.
-  const [indexHtml, unlockHtml] = await Promise.all([
-    capture(`${BASEPATH}/`),
-    capture(`${BASEPATH}/unlock`),
-  ]);
+  const indexHtml = await capture(`${BASEPATH}/`);
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(path.join(OUT_DIR, "index.html"), indexHtml);
   // unlock.html (not unlock/index.html) so relative ./assets URLs resolve
   // from every page, including on project sites served from a sub-path.
-  await writeFile(path.join(OUT_DIR, "unlock.html"), unlockHtml);
+  // The root page contains the unlock screen itself. Reuse the same shell for
+  // legacy /unlock links rather than asking the build server to resolve a
+  // nested route beneath the deployment base path.
+  await writeFile(path.join(OUT_DIR, "unlock.html"), indexHtml);
   await copyFile(path.join(OUT_DIR, "index.html"), path.join(OUT_DIR, "404.html"));
 
   console.log("\nStatic site written to dist/client:");
