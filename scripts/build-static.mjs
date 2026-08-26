@@ -71,8 +71,7 @@ async function capture(urlPath) {
     "})();</script>";
   // A relative base records the GitHub Pages repository prefix before the
   // normalizer presents a root-relative route to TanStack Router.
-  html = html.replace("<head>", '<head><base href="./">');
-  html = html.replace("<head>", "<head>" + normalize);
+  html = html.replace("<head>", '<head><base href="./">' + normalize);
   return html;
 }
 
