@@ -233,9 +233,11 @@
   }
 
   main {
-    max-width: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    overflow: visible !important;
   }
 
   /* Tighten the vertical rhythm so all five sections share one page */
