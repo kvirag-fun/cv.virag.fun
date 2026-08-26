@@ -211,6 +211,8 @@
 
   html,
   body {
+    height: auto !important;
+    min-height: 0 !important;
     background: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -218,6 +220,11 @@
 
   .no-print {
     display: none !important;
+  }
+
+  /* Avoid a trailing blank sheet from full-viewport wrappers */
+  .min-h-screen {
+    min-height: 0 !important;
   }
 
   .reveal {
