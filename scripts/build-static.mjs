@@ -20,6 +20,7 @@ import path from "node:path";
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
 const OUT_DIR = path.resolve("dist/client");
+const BASEPATH = (process.env.VITE_BASEPATH ?? "/").replace(/\/$/, "") || "";
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
@@ -81,7 +82,13 @@ await run("bun", ["run", "build"]);
 // 3. Serve the build and capture the two routes as HTML
 const server = await serveBuild();
 try {
-  const [indexHtml, unlockHtml] = await Promise.all([capture("/"), capture("/unlock")]);
+  // Render at the same base path the browser router will use. Capturing at "/"
+  // while the router is configured for "/<repo>" creates mismatched hydration
+  // state and crashes with "Invariant failed" on GitHub Pages.
+  const [indexHtml, unlockHtml] = await Promise.all([
+    capture(`${BASEPATH}/`),
+    capture(`${BASEPATH}/unlock`),
+  ]);
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(path.join(OUT_DIR, "index.html"), indexHtml);
