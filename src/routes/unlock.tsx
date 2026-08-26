@@ -50,7 +50,7 @@ function UnlockPage() {
           error && "animate-shake",
         )}
       >
-        <div className="corner-ticks absolute inset-0" aria-hidden="true" />
+        <div className="corner-ticks pointer-events-none absolute inset-0" aria-hidden="true" />
 
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
           Restricted document

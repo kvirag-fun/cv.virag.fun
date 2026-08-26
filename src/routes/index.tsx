@@ -344,7 +344,7 @@ function Education({ cv }: { cv: CvData }) {
         {cv.education.map((edu, i) => (
           <Reveal key={edu.field + edu.period} delay={i * 60}>
             <li className="group relative border border-border bg-card p-6 transition-colors hover:border-primary">
-              <div className="corner-ticks absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+              <div className="corner-ticks pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
                 <h3 className="font-display text-xl font-semibold text-foreground">{edu.field}</h3>
                 <p className="font-mono text-xs tracking-[0.1em] text-muted-foreground">{edu.period}</p>
