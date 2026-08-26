@@ -223,8 +223,10 @@
   }
 
   /* Avoid a trailing blank sheet from full-viewport wrappers */
-  .min-h-screen {
+  body .min-h-screen,
+  body div[class*="min-h-screen"] {
     min-height: 0 !important;
+    height: auto !important;
   }
 
   .reveal {
