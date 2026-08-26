@@ -107,8 +107,15 @@ await rm(path.resolve("node_modules/.nitro"), { recursive: true, force: true });
 // 2. Production build (client + server bundles)
 await run("bun", ["run", "build"]);
 
-// 3. Serve the build and capture the two routes as HTML
-const server = await serveBuild();
+// 3. Locate the build output (dist/* or .output/*) and serve it
+const dirs = await resolveBuildDirs();
+if (dirs.client !== OUT_DIR) {
+  await rm(OUT_DIR, { recursive: true, force: true });
+  await mkdir(path.dirname(OUT_DIR), { recursive: true });
+  await cp(dirs.client, OUT_DIR, { recursive: true });
+}
+
+const server = await serveBuild(dirs.server);
 try {
   const indexHtml = await capture("/");
 
