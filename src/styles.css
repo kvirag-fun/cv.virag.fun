@@ -205,7 +205,7 @@
   /* Tailwind sizing is rem-based, so shrinking the root font scales the whole
      document down proportionally to fit one A4 sheet. */
   html {
-    font-size: 6.2px;
+    font-size: 5.3px;
     scroll-behavior: auto;
   }
 
