@@ -14,6 +14,7 @@
 
 import { spawn } from "node:child_process";
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import http from "node:http";
 import path from "node:path";
 
 const PORT = 4173;
@@ -29,36 +30,44 @@ function run(cmd, args) {
   });
 }
 
-async function waitForServer(timeoutMs = 30_000) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
+// Serve the built server bundle over plain HTTP (GET is all we need).
+async function serveBuild() {
+  const mod = await import(path.resolve("dist/server/index.mjs"));
+  const entry = mod.default ?? mod;
+  const fetchHandler = typeof entry === "function" ? entry : entry.fetch.bind(entry);
+  const server = http.createServer(async (req, res) => {
     try {
-      const res = await fetch(ORIGIN + "/unlock");
-      if (res.ok) return;
-    } catch {
-      // not up yet
+      const response = await fetchHandler(new Request(ORIGIN + req.url), {}, {
+        waitUntil() {},
+      });
+      res.writeHead(response.status, Object.fromEntries(response.headers));
+      res.end(Buffer.from(await response.arrayBuffer()));
+    } catch (err) {
+      res.writeHead(500);
+      res.end(String(err));
     }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error(`Preview server did not start on ${ORIGIN}`);
+  });
+  await new Promise((resolve) => server.listen(PORT, resolve));
+  return server;
 }
 
 async function capture(urlPath) {
   const res = await fetch(ORIGIN + urlPath);
   if (!res.ok) throw new Error(`GET ${urlPath} → ${res.status}`);
-  return await res.text();
+  let html = await res.text();
+  // The SSR payload emits asset URLs as "/./assets/…" (vite base "./").
+  // Make them document-relative so the site works from any sub-path,
+  // e.g. username.github.io/<repo>/.
+  html = html.replaceAll("/./assets/", "./assets/");
+  return html;
 }
 
 // 1. Production build (client + server bundles)
 await run("bun", ["run", "build"]);
 
 // 2. Serve the build and capture the two routes as HTML
-const preview = spawn("bunx", ["vite", "preview", "--port", String(PORT), "--strictPort"], {
-  stdio: "ignore",
-});
+const server = await serveBuild();
 try {
-  await waitForServer();
-
   const [indexHtml, unlockHtml] = await Promise.all([capture("/"), capture("/unlock")]);
 
   await mkdir(OUT_DIR, { recursive: true });
@@ -71,5 +80,5 @@ try {
   console.log("\nStatic site written to dist/client:");
   console.log("  index.html, unlock.html, 404.html, assets/");
 } finally {
-  preview.kill();
+  server.close();
 }
