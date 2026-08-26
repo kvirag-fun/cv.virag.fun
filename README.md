@@ -63,3 +63,4 @@ The included GitHub Actions workflow sets this automatically.
 bun install
 SITE_PASSWORD="..." bun run dev
 ```
+end
