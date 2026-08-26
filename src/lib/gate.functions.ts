@@ -9,7 +9,7 @@ import {
 import { cvData } from "./cv-data.server";
 
 export const unlockSite = createServerFn({ method: "POST" })
-  .inputValidator((data: { password: string }) => ({
+  .validator((data: { password: string }) => ({
     password: typeof data?.password === "string" ? data.password : "",
   }))
   .handler(async ({ data }) => {
