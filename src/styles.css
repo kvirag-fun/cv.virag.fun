@@ -238,7 +238,11 @@
   /* Decorative background grid off — saves ink and avoids banding */
   .bg-blueprint-grid,
   .bg-blueprint-grid-lg {
-    background-image: none !important;
+    display: none !important;
+  }
+
+  .fixed {
+    display: none !important;
   }
 
   main {
