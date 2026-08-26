@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Skill } from "@/lib/cv-data.server";
+import type { Skill } from "@/lib/cv-types";
 
 /** Skill row with a bar that animates to its score when scrolled into view. */
 export function SkillBar({ skill }: { skill: Skill }) {
