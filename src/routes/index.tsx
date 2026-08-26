@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   MapPin,
@@ -18,6 +18,7 @@ import { clearUnlocked, loadUnlocked, type UnlockedCv } from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
 import { Reveal } from "@/components/cv/reveal";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
+import { UnlockScreen } from "@/components/cv/unlock-screen";
 import { SkillBar } from "@/components/cv/skill-bar";
 import { cn } from "@/lib/utils";
 
