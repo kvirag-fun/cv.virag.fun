@@ -55,8 +55,8 @@ function run(cmd, args) {
 }
 
 // Serve the built server bundle over plain HTTP (GET is all we need).
-async function serveBuild() {
-  const mod = await import(path.resolve("dist/server/index.mjs"));
+async function serveBuild(serverEntry) {
+  const mod = await import(serverEntry);
   const entry = mod.default ?? mod;
   const fetchHandler = typeof entry === "function" ? entry : entry.fetch.bind(entry);
   const server = http.createServer(async (req, res) => {
