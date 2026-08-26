@@ -13,7 +13,7 @@
 // Usage: bun run build:static   (or: node scripts/build-static.mjs)
 
 import { spawn } from "node:child_process";
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 
@@ -32,7 +32,7 @@ function run(cmd, args) {
 
 // Serve the built server bundle over plain HTTP (GET is all we need).
 async function serveBuild() {
-  const mod = await import(path.resolve(".output/server/index.mjs"));
+  const mod = await import(path.resolve("dist/server/index.mjs"));
   const entry = mod.default ?? mod;
   const fetchHandler = typeof entry === "function" ? entry : entry.fetch.bind(entry);
   const server = http.createServer(async (req, res) => {
@@ -62,27 +62,40 @@ async function capture(urlPath) {
   // Normalize literal filenames (unlock.html, index.html) to the real routes
   // before the router boots — static hosts serve the files as-is.
   const normalize =
-    "<script>(function(){var p=location.pathname;" +
-    'if(p.endsWith("/unlock.html"))history.replaceState(null,"",p.slice(0,-5)+location.search+location.hash);' +
-    'else if(p.endsWith("/index.html"))history.replaceState(null,"",p.slice(0,-10)+location.search+location.hash);' +
+    "<script>(function(){var p=location.pathname,b=document.querySelector('base');" +
+    "var root=b?new URL(b.href).pathname.replace(/\\/$/,''):'';" +
+    "if(root&&p.indexOf(root)===0)p=p.slice(root.length)||'/';" +
+    'if(p.endsWith("/unlock.html"))p=p.slice(0,-5);' +
+    'else if(p.endsWith("/index.html"))p=p.slice(0,-10)||"/";' +
+    'history.replaceState(null,"",p+location.search+location.hash);' +
     "})();</script>";
-  html = html.replace("<head>", "<head>" + normalize);
+  // A relative base records the GitHub Pages repository prefix before the
+  // normalizer presents a root-relative route to TanStack Router.
+  html = html.replace("<head>", '<head><base href="./">' + normalize);
   return html;
 }
 
-// 1. Production build (client + server bundles)
+// 1. Remove TanStack/Nitro's generated service cache. Reusing it can make the
+// captured HTML reference asset hashes from an older build, leaving the page
+// permanently on the server-rendered "Verifying access" placeholder.
+await rm(path.resolve("node_modules/.nitro"), { recursive: true, force: true });
+
+// 2. Production build (client + server bundles)
 await run("bun", ["run", "build"]);
 
-// 2. Serve the build and capture the two routes as HTML
+// 3. Serve the build and capture the two routes as HTML
 const server = await serveBuild();
 try {
-  const [indexHtml, unlockHtml] = await Promise.all([capture("/"), capture("/unlock")]);
+  const indexHtml = await capture("/");
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(path.join(OUT_DIR, "index.html"), indexHtml);
   // unlock.html (not unlock/index.html) so relative ./assets URLs resolve
   // from every page, including on project sites served from a sub-path.
-  await writeFile(path.join(OUT_DIR, "unlock.html"), unlockHtml);
+  // The root page contains the unlock screen itself. Reuse the same shell for
+  // legacy /unlock links rather than asking the build server to resolve a
+  // nested route beneath the deployment base path.
+  await writeFile(path.join(OUT_DIR, "unlock.html"), indexHtml);
   await copyFile(path.join(OUT_DIR, "index.html"), path.join(OUT_DIR, "404.html"));
 
   console.log("\nStatic site written to dist/client:");
