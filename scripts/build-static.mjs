@@ -13,7 +13,7 @@
 // Usage: bun run build:static   (or: node scripts/build-static.mjs)
 
 import { spawn } from "node:child_process";
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 
@@ -70,10 +70,15 @@ async function capture(urlPath) {
   return html;
 }
 
-// 1. Production build (client + server bundles)
+// 1. Remove TanStack/Nitro's generated service cache. Reusing it can make the
+// captured HTML reference asset hashes from an older build, leaving the page
+// permanently on the server-rendered "Verifying access" placeholder.
+await rm(path.resolve("node_modules/.nitro"), { recursive: true, force: true });
+
+// 2. Production build (client + server bundles)
 await run("bun", ["run", "build"]);
 
-// 2. Serve the build and capture the two routes as HTML
+// 3. Serve the build and capture the two routes as HTML
 const server = await serveBuild();
 try {
   const [indexHtml, unlockHtml] = await Promise.all([capture("/"), capture("/unlock")]);
