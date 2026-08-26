@@ -20,7 +20,6 @@ import path from "node:path";
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
 const OUT_DIR = path.resolve("dist/client");
-const BASEPATH = (process.env.VITE_BASEPATH ?? "/").replace(/\/$/, "") || "";
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
@@ -63,10 +62,16 @@ async function capture(urlPath) {
   // Normalize literal filenames (unlock.html, index.html) to the real routes
   // before the router boots — static hosts serve the files as-is.
   const normalize =
-    "<script>(function(){var p=location.pathname;" +
-    'if(p.endsWith("/unlock.html"))history.replaceState(null,"",p.slice(0,-5)+location.search+location.hash);' +
-    'else if(p.endsWith("/index.html"))history.replaceState(null,"",p.slice(0,-10)+location.search+location.hash);' +
+    "<script>(function(){var p=location.pathname,b=document.querySelector('base');" +
+    "var root=b?new URL(b.href).pathname.replace(/\\/$/,''):'';" +
+    "if(root&&p.indexOf(root)===0)p=p.slice(root.length)||'/';" +
+    'if(p.endsWith("/unlock.html"))p=p.slice(0,-5);' +
+    'else if(p.endsWith("/index.html"))p=p.slice(0,-10)||"/";' +
+    'history.replaceState(null,"",p+location.search+location.hash);' +
     "})();</script>";
+  // A relative base records the GitHub Pages repository prefix before the
+  // normalizer presents a root-relative route to TanStack Router.
+  html = html.replace("<head>", '<head><base href="./">');
   html = html.replace("<head>", "<head>" + normalize);
   return html;
 }
@@ -82,10 +87,7 @@ await run("bun", ["run", "build"]);
 // 3. Serve the build and capture the two routes as HTML
 const server = await serveBuild();
 try {
-  // Render at the same base path the browser router will use. Capturing at "/"
-  // while the router is configured for "/<repo>" creates mismatched hydration
-  // state and crashes with "Invariant failed" on GitHub Pages.
-  const indexHtml = await capture(`${BASEPATH}/`);
+  const indexHtml = await capture("/");
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(path.join(OUT_DIR, "index.html"), indexHtml);
