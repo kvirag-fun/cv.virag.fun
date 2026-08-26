@@ -19,7 +19,14 @@ export function SkillBar({ skill }: { skill: Skill }) {
       { threshold: 0.4 },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+
+    // Printing must never show empty bars, even for rows never scrolled to.
+    const onBeforePrint = () => setVisible(true);
+    window.addEventListener("beforeprint", onBeforePrint);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("beforeprint", onBeforePrint);
+    };
   }, []);
 
   return (

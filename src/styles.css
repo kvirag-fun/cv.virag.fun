@@ -197,16 +197,106 @@
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  /* Tailwind sizing is rem-based, so shrinking the root font scales the whole
+     document down proportionally to fit one A4 sheet. */
+  html {
+    font-size: 6.2px;
+    scroll-behavior: auto;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .no-print {
     display: none !important;
   }
 
+  /* Avoid a trailing blank sheet from full-viewport wrappers */
+  body > div,
+  body .min-h-screen {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  html,
   body {
-    background: white;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
+  }
+
+  /* Decorative background grid off — saves ink and avoids banding */
+  .bg-blueprint-grid,
+  .bg-blueprint-grid-lg {
+    display: none !important;
+  }
+
+  .fixed {
+    display: none !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 3mm !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Tighten the vertical rhythm so all five sections share one page */
+  main > section {
+    margin-top: 0.8rem !important;
+    padding-top: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  main > section:first-child {
+    margin-top: 0 !important;
+  }
+
+  main > section > ol,
+  main > section > div,
+  main > section > .mt-10 {
+    margin-top: 0.6rem !important;
+  }
+
+  li,
+  figure,
+  h1,
+  h2,
+  h3 {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  footer {
+    margin-top: 0.8rem !important;
+    padding-top: 0.4rem !important;
+  }
+
+  /* Bars are transition-driven; force their final state for the printer */
+  .transition-\[width\] {
+    transition: none !important;
+  }
+
+  a {
+    text-decoration: none;
   }
 }
