@@ -73,7 +73,7 @@ function UnlockPage() {
           view it.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <form onSubmit={onSubmit} method="post" className="mt-8 space-y-4">
           <label className="block">
             <span className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               <Fingerprint className="h-3.5 w-3.5" aria-hidden="true" />
