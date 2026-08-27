@@ -49,9 +49,8 @@
   ],
   "skills": [
     { "name": "Allplan", "level": "Expert", "score": 96 },
-    { "name": "Microsoft Office", "level": "Advanced", "score": 82 },
-    { "name": "Jira (Atlassian)", "level": "Skillful", "score": 68 },
-    { "name": "Confluence (Atlassian)", "level": "Skillful", "score": 68 },
+    { "name": "Jira & Confluence (Atlassian)", "level": "Skillful", "score": 68 },
+    { "name": "AI Prompt Engineering (Lovable, Perplexity)", "level": "Skillful", "score": 70 },
     { "name": "Python", "level": "Basic", "score": 34 }
   ],
   "languages": [
