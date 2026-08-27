@@ -49,8 +49,8 @@
   ],
   "skills": [
     { "name": "Allplan", "level": "Expert", "score": 96 },
-    { "name": "Jira & Confluence (Atlassian)", "level": "Skillful", "score": 68 },
-    { "name": "AI Prompt Engineering (Lovable, Perplexity)", "level": "Skillful", "score": 70 },
+    { "name": "Jira & Confluence (Atlassian)", "level": "Skillful", "score": 70 },
+    { "name": "AI Prompt Engineering (Lovable, Perplexity)", "level": "Skillful", "score": 65 },
     { "name": "Python", "level": "Basic", "score": 34 }
   ],
   "languages": [
