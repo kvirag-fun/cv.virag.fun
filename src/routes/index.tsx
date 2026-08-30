@@ -167,14 +167,8 @@ function SectionHeading({
 
 function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
   return (
-    <section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
-      <Reveal>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
-          Curriculum Vitae — {cv.location}
-        </p>
-      </Reveal>
-
-      <div className="mt-8 grid gap-10 sm:grid-cols-[1fr_auto] sm:items-start">
+<section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
+      <div className="mt-2 grid gap-10 sm:grid-cols-[1fr_auto] sm:items-start">
         <div>
           <Reveal delay={80}>
             <h1 className="font-display text-5xl leading-[1.05] font-semibold tracking-tight text-foreground sm:text-6xl">
