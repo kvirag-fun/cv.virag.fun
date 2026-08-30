@@ -1,0 +1,68 @@
+{
+  "name": "Lorem Ipsum",
+  "title": "Dolor Sit Amet",
+  "tagline": "Lorem ipsum dolor sit amet, consectetur adipiscing elit — sed do eiusmod tempor incididunt ut labore.",
+  "location": "Consectetur, Adipiscing",
+  "email": "lorem@example.com",
+  "phone": "+00 000 000 000",
+  "birthDate": "1. 1. 1970",
+  "about": [
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt."
+  ],
+  "experience": [
+    {
+      "role": "Lorem Ipsum Manager",
+      "company": "Dolor Sit Amet s.r.o.",
+      "location": "Consectetur",
+      "period": "2020 — present",
+      "current": true,
+      "summary": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+      "bullets": [
+        "Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae.",
+        "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.",
+        "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur."
+      ]
+    },
+    {
+      "role": "Adipiscing Specialist",
+      "company": "Tempor Incididunt a.s.",
+      "location": "Labore",
+      "period": "2017 — 2020",
+      "bullets": [
+        "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.",
+        "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae."
+      ]
+    }
+  ],
+  "skills": [
+    { "name": "Lorem Ipsum", "level": "Expert", "score": 90 },
+    { "name": "Dolor Sit Amet", "level": "Advanced", "score": 80 },
+    { "name": "Consectetur Adipiscing", "level": "Skillful", "score": 70 },
+    { "name": "Tempor Incididunt", "level": "Skillful", "score": 65 },
+    { "name": "Magna Aliqua", "level": "Basic", "score": 45 }
+  ],
+  "languages": [
+    { "name": "Lorem", "level": "Native" },
+    { "name": "Ipsum", "level": "Native" },
+    { "name": "Dolor", "level": "B2" }
+  ],
+  "education": [
+    {
+      "school": "Universitas Lorem Ipsum",
+      "field": "Master's degree, Dolor Sit Amet",
+      "period": "2013 — 2018",
+      "location": "Consectetur",
+      "note": "Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+      "school": "Gymnasium Adipiscing",
+      "field": "Middle school",
+      "period": "2009 — 2013",
+      "location": "Elit"
+    }
+  ],
+  "interests": "Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor.",
+  "interestTags": ["Lorem", "Ipsum", "Dolor", "Sit", "Amet"],
+  "drivingLicense": "B — lorem ipsum"
+}
