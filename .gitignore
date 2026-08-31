@@ -34,3 +34,6 @@ dist-ssr
 # Real CV content — never commit (injected at build time via GitHub secrets)
 scripts/cv-source.json
 src/assets/portrait.jpg
+
+# Local real-data payload override — never commit
+src/lib/cv-payload.local.ts
