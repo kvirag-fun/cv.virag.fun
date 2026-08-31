@@ -120,7 +120,9 @@ export function UnlockScreen({ onUnlocked }: { onUnlocked: (value: UnlockedCv) =
       </div>
 
       <p className="absolute bottom-6 px-4 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
-        AES-256 encrypted · the passphrase never leaves your browser
+        {IS_OPEN
+          ? "Preview mode · no passphrase configured for this build"
+          : "AES-256 encrypted · the passphrase never leaves your browser"}
       </p>
     </main>
   );
