@@ -28,6 +28,22 @@ if (passphrase && !locked) {
   console.warn("SITE_PASSWORD is shorter than 8 characters — ignoring it and shipping open.");
 }
 
+// Output target:
+//  - CI (CV_SOURCE_JSON / CV_PORTRAIT_BASE64 env set, or no local source):
+//    writes the committed src/lib/cv-payload.ts.
+//  - Local dev with a git-ignored scripts/cv-source.json: writes
+//    src/lib/cv-payload.local.ts (also git-ignored), which vite.config.ts
+//    aliases over the committed placeholder so the preview shows real data
+//    without it ever entering the repo.
+const usingEnvSecrets = Boolean(
+  process.env.CV_SOURCE_JSON?.trim() || process.env.CV_PORTRAIT_BASE64?.trim(),
+);
+const hasLocalSource = existsSync(join(root, "scripts/cv-source.json"));
+const outFile =
+  !usingEnvSecrets && hasLocalSource
+    ? "src/lib/cv-payload.local.ts"
+    : "src/lib/cv-payload.ts";
+
 // ---------------------------------------------------------------- CV content
 let cvJson;
 let cvOrigin;
@@ -109,10 +125,10 @@ export const CV_PAYLOAD = {
 } as const;
 `;
 
-writeFileSync(join(root, "src/lib/cv-payload.ts"), out);
+writeFileSync(join(root, outFile), out);
 console.log(
   `${locked ? "Encrypted" : "Packed (OPEN — no passphrase)"} CV from ${cvOrigin} ` +
-    `(${cvJson.length} B) + portrait from ${portraitOrigin} (${portrait.length} B) -> src/lib/cv-payload.ts`,
+    `(${cvJson.length} B) + portrait from ${portraitOrigin} (${portrait.length} B) -> ${outFile}`,
 );
 if (!locked) {
   console.warn("No SITE_PASSWORD set: the site will be publicly readable, gate bypassed.");

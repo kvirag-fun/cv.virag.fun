@@ -16,6 +16,23 @@ export default defineConfig({
     // Relative asset URLs so the static build works from any sub-path
     // (e.g. username.github.io/<repo>/).
     base: "./",
+    resolve: {
+      alias: [
+        // Local dev: when scripts/encrypt-cv.mjs generated a git-ignored
+        // cv-payload.local.ts from the real (git-ignored) cv-source.json,
+        // use it instead of the committed placeholder payload.
+        ...(existsSync(new URL("./src/lib/cv-payload.local.ts", import.meta.url))
+          ? [
+              {
+                find: "@/lib/cv-payload",
+                replacement: fileURLToPath(
+                  new URL("./src/lib/cv-payload.local.ts", import.meta.url),
+                ),
+              },
+            ]
+          : []),
+      ],
+    },
   },
   // Static hosting: `bun run build:static` builds normally, then captures the
   // rendered pages into dist/client as plain HTML (see scripts/build-static.mjs).
