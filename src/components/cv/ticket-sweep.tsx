@@ -23,10 +23,12 @@ interface RoundDef {
   showPriorityColor: boolean;
 }
 
+// count is a multiple of 8 (the desktop grid's column count) so the board
+// comes out to an exact number of rows there: 3, then 4, then 5.
 const ROUNDS: RoundDef[] = [
   {
     seed: 1001,
-    count: 18,
+    count: 24,
     targetCount: 4,
     mode: "priority",
     instruction: "Find every P0 ticket",
@@ -34,7 +36,7 @@ const ROUNDS: RoundDef[] = [
   },
   {
     seed: 2002,
-    count: 28,
+    count: 32,
     targetCount: 5,
     mode: "priority",
     instruction: "Find every P0 ticket",
@@ -42,7 +44,7 @@ const ROUNDS: RoundDef[] = [
   },
   {
     seed: 3003,
-    count: 38,
+    count: 40,
     targetCount: 6,
     mode: "unassigned",
     instruction: "Find every unassigned ticket",
@@ -74,8 +76,10 @@ function shuffledIndices(random: () => number, n: number): number[] {
   return arr;
 }
 
-function generateBoard(round: RoundDef): Ticket[] {
-  const random = mulberry32(round.seed);
+function generateBoard(round: RoundDef, gameSeed: number): Ticket[] {
+  // XOR the round's base seed with a fresh per-game seed so ticket
+  // positions differ every playthrough instead of being identical every time.
+  const random = mulberry32(round.seed ^ gameSeed);
   const targetSlots = new Set(shuffledIndices(random, round.count).slice(0, round.targetCount));
   const tickets: Ticket[] = [];
   for (let i = 0; i < round.count; i++) {
@@ -117,6 +121,7 @@ export function TicketSweep() {
   const [roundClear, setRoundClear] = useState(false);
   const [finalMs, setFinalMs] = useState<number | null>(null);
   const [bestMs, setBestMs] = useState<number | null>(null);
+  const [gameSeed, setGameSeed] = useState(() => Date.now());
   const [, forceTick] = useState(0);
 
   const startedAtRef = useRef<number | null>(null);
@@ -147,7 +152,7 @@ export function TicketSweep() {
   }, []);
 
   const round = ROUNDS[roundIndex]!;
-  const board = useMemo(() => generateBoard(round), [round]);
+  const board = useMemo(() => generateBoard(round, gameSeed), [round, gameSeed]);
 
   const elapsedMs =
     phase === "finished" && finalMs !== null
@@ -162,6 +167,7 @@ export function TicketSweep() {
     setFound(new Set());
     setRoundClear(false);
     setFinalMs(null);
+    setGameSeed(Date.now());
     penaltyMsRef.current = 0;
     startedAtRef.current = performance.now();
   }
