@@ -33,10 +33,18 @@ const usingEnvSecrets = Boolean(
   process.env.CV_SOURCE_JSON?.trim() || process.env.CV_PORTRAIT_BASE64?.trim(),
 );
 const hasLocalSource = existsSync(join(root, "scripts/cv-source.json"));
-const outFile =
-  !usingEnvSecrets && hasLocalSource
-    ? "src/lib/cv-payload.local.ts"
-    : "src/lib/cv-payload.ts";
+const isLocalOverride = !usingEnvSecrets && hasLocalSource;
+const outFile = isLocalOverride
+  ? "src/lib/cv-payload.local.ts"
+  : "src/lib/cv-payload.ts";
+
+// The local override is the private Lovable preview — always open, no
+// passphrase. SITE_PASSWORD only applies to CI builds (GitHub Pages).
+const passphrase = isLocalOverride ? undefined : process.env.SITE_PASSWORD?.trim();
+const locked = Boolean(passphrase && passphrase.length >= 8);
+if (passphrase && !locked) {
+  console.warn("SITE_PASSWORD is shorter than 8 characters — ignoring it and shipping open.");
+}
 
 // ---------------------------------------------------------------- CV content
 let cvJson;
