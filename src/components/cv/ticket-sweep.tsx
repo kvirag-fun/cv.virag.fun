@@ -281,16 +281,24 @@ export function TicketSweep() {
                       <span>{ticket.id}</span>
                       {round.mode === "priority" ? (
                         <span
-                          className={
-                            round.showPriorityColor
-                              ? PRIORITY_COLOR[ticket.priority]
-                              : "text-muted-foreground"
-                          }
+                          className={cn(
+                            isFound
+                              ? "text-muted-foreground/40"
+                              : round.showPriorityColor
+                                ? PRIORITY_COLOR[ticket.priority]
+                                : "text-muted-foreground",
+                          )}
                         >
                           {ticket.priority}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">{ticket.assignee}</span>
+                        <span
+                          className={cn(
+                            isFound ? "text-muted-foreground/40" : "text-muted-foreground",
+                          )}
+                        >
+                          {ticket.assignee}
+                        </span>
                       )}
                     </button>
                   );
