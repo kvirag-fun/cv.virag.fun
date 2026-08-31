@@ -98,7 +98,7 @@ function CvPage() {
       {/* Top bar */}
       <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
         <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          CV · {cv.name}
+          {cv.name}
         </span>
         <div className="flex items-center gap-2">
           <PrintButton compact />
