@@ -26,6 +26,7 @@ import { Reveal } from "@/components/cv/reveal";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
 import { UnlockScreen } from "@/components/cv/unlock-screen";
 import { SkillBar } from "@/components/cv/skill-bar";
+import { TicketSweep } from "@/components/cv/ticket-sweep";
 import { cn } from "@/lib/utils";
 
 // The CV ships only as AES-GCM ciphertext (src/lib/cv-payload.ts). This page
@@ -422,6 +423,10 @@ function Beyond({ cv }: { cv: CvData }) {
             ))}
           </ul>
         </div>
+      </Reveal>
+
+      <Reveal delay={100}>
+        <TicketSweep />
       </Reveal>
     </section>
   );
