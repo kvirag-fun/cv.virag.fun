@@ -38,7 +38,7 @@ const PRIORITY_COLOR: Record<PriorityTier, string> = {
   Minor: "text-primary",
 };
 const DECOY_PRIORITY_POOL: PriorityTier[] = ["Major", "Minor"];
-const ASSIGNEE_POOL = ["@kv", "@jsmith", "@anna", "@marek", "@dlee", "@nova"];
+const ASSIGNEE_POOL = ["@kvirag", "@jsmith", "@rchen", "@mpatel", "@dlee", "@sturner"];
 
 /** Deterministic PRNG so every round's board is identical across plays (needed for a future ghost-run replay to line up). */
 function mulberry32(seed: number) {
