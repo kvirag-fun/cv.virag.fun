@@ -14,7 +14,13 @@ import {
   Printer,
   ArrowUpRight,
 } from "lucide-react";
-import { clearUnlocked, loadUnlocked, type UnlockedCv } from "@/lib/crypto";
+import {
+  clearUnlocked,
+  loadUnlocked,
+  IS_OPEN,
+  readOpenPayload,
+  type UnlockedCv,
+} from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
 import { Reveal } from "@/components/cv/reveal";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
@@ -53,7 +59,8 @@ function CvPage() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    setUnlocked(loadUnlocked());
+    // No passphrase was configured at build time — show the CV right away.
+    setUnlocked(IS_OPEN ? readOpenPayload() : loadUnlocked());
     setChecked(true);
   }, []);
 
@@ -92,7 +99,7 @@ function CvPage() {
         <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
           CV · {cv.name}
         </span>
-        <LockButton onLock={onLock} compact />
+        {!IS_OPEN && <LockButton onLock={onLock} compact />}
       </header>
 
       <main className="relative mx-auto max-w-3xl px-5 pb-24 sm:px-8">
@@ -116,7 +123,7 @@ function CvPage() {
                 <Printer className="h-3.5 w-3.5" aria-hidden="true" />
                 Print
               </button>
-              <LockButton onLock={onLock} />
+              {!IS_OPEN && <LockButton onLock={onLock} />}
             </div>
           </div>
         </footer>
