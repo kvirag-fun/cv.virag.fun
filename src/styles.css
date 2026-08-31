@@ -269,6 +269,15 @@
     font-size: 5.5px !important;
   }
 
+  /* The section-heading icon is sized in rem (h-3.5/w-3.5), so it shrinks
+     with the root-font trick above while the label text next to it is now a
+     hardcoded px size — left alone it prints noticeably smaller than the
+     text it sits beside. Pin it to match. */
+  .section-heading-icon {
+    height: 7.5px !important;
+    width: 7.5px !important;
+  }
+
   html,
   body {
     height: auto !important;
