@@ -11,6 +11,9 @@
 //   CV_SOURCE_JSON   the CV content as raw JSON. Falls back to
 //                    scripts/cv-source.json, and if that is missing too, to
 //                    scripts/cv-placeholder.json (lorem ipsum).
+//   CV_PORTRAIT_BASE64  the portrait photo as base64 (no data: prefix).
+//                    Falls back to src/assets/portrait.jpg, then to a blank
+//                    1x1 placeholder.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { randomBytes, pbkdf2Sync, createCipheriv } from "node:crypto";
@@ -47,9 +50,23 @@ const PLACEHOLDER_PORTRAIT = Buffer.from(
   "base64",
 );
 const portraitPath = join(root, "src/assets/portrait.jpg");
-const hasPortrait = existsSync(portraitPath);
-const portrait = hasPortrait ? readFileSync(portraitPath) : PLACEHOLDER_PORTRAIT;
-const portraitType = hasPortrait ? "image/jpeg" : "image/png";
+const envPortrait = process.env.CV_PORTRAIT_BASE64?.trim();
+let portrait;
+let portraitType;
+let portraitOrigin;
+if (envPortrait) {
+  portrait = Buffer.from(envPortrait.replace(/^data:[^,]+,/, ""), "base64");
+  portraitType = "image/jpeg";
+  portraitOrigin = "CV_PORTRAIT_BASE64 env";
+} else if (existsSync(portraitPath)) {
+  portrait = readFileSync(portraitPath);
+  portraitType = "image/jpeg";
+  portraitOrigin = "src/assets/portrait.jpg";
+} else {
+  portrait = PLACEHOLDER_PORTRAIT;
+  portraitType = "image/png";
+  portraitOrigin = "blank placeholder";
+}
 
 // ----------------------------------------------------------------- packaging
 const ITERATIONS = 600_000; // OWASP recommendation for PBKDF2-SHA256
@@ -95,7 +112,7 @@ export const CV_PAYLOAD = {
 writeFileSync(join(root, "src/lib/cv-payload.ts"), out);
 console.log(
   `${locked ? "Encrypted" : "Packed (OPEN — no passphrase)"} CV from ${cvOrigin} ` +
-    `(${cvJson.length} B) + portrait (${portrait.length} B) -> src/lib/cv-payload.ts`,
+    `(${cvJson.length} B) + portrait from ${portraitOrigin} (${portrait.length} B) -> src/lib/cv-payload.ts`,
 );
 if (!locked) {
   console.warn("No SITE_PASSWORD set: the site will be publicly readable, gate bypassed.");
