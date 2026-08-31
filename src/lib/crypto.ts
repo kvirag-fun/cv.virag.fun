@@ -60,7 +60,7 @@ async function decryptBytes(key: CryptoKey, iv: string, data: string): Promise<A
 
 // True when the build had no passphrase configured — the payload ships in the
 // clear and the gate is bypassed entirely.
-export const IS_OPEN: boolean = CV_PAYLOAD.locked === false;
+export const IS_OPEN: boolean = !(CV_PAYLOAD.locked as boolean);
 
 // Reads an unencrypted (open) payload straight out of the bundle.
 export function readOpenPayload(): UnlockedCv {

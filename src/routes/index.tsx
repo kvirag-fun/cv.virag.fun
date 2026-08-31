@@ -14,7 +14,13 @@ import {
   Printer,
   ArrowUpRight,
 } from "lucide-react";
-import { clearUnlocked, loadUnlocked, type UnlockedCv } from "@/lib/crypto";
+import {
+  clearUnlocked,
+  loadUnlocked,
+  IS_OPEN,
+  readOpenPayload,
+  type UnlockedCv,
+} from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
 import { Reveal } from "@/components/cv/reveal";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
@@ -53,7 +59,8 @@ function CvPage() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    setUnlocked(loadUnlocked());
+    // No passphrase was configured at build time — show the CV right away.
+    setUnlocked(IS_OPEN ? readOpenPayload() : loadUnlocked());
     setChecked(true);
   }, []);
 
