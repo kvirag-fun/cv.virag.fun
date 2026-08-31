@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { LockKeyhole, Fingerprint, ArrowRight } from "lucide-react";
-import { saveUnlocked, unlockWithPassphrase, type UnlockedCv } from "@/lib/crypto";
+import {
+  IS_OPEN,
+  readOpenPayload,
+  saveUnlocked,
+  unlockWithPassphrase,
+  type UnlockedCv,
+} from "@/lib/crypto";
 import { cn } from "@/lib/utils";
 
 // Passphrase screen. Rendered both at /unlock and inline on "/" when the tab
