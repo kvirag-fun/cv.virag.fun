@@ -213,9 +213,6 @@ function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
               height={220}
               className="h-44 w-44 border border-border object-cover sm:h-56 sm:w-56"
             />
-            <figcaption className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-              fig. 01 — the author
-            </figcaption>
           </figure>
         </Reveal>
       </div>
