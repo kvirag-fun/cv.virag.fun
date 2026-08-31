@@ -15,14 +15,10 @@ import {
   Printer,
   ArrowUpRight,
 } from "lucide-react";
-import {
-  clearUnlocked,
-  loadUnlocked,
-  IS_OPEN,
-  type UnlockedCv,
-} from "@/lib/crypto";
+import { clearUnlocked, loadUnlocked, IS_OPEN, type UnlockedCv } from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
 import { Reveal } from "@/components/cv/reveal";
+import { SectionHeading } from "@/components/cv/section-heading";
 import { SideNav, type NavSection } from "@/components/cv/side-nav";
 import { UnlockScreen } from "@/components/cv/unlock-screen";
 import { SkillBar } from "@/components/cv/skill-bar";
@@ -102,8 +98,24 @@ function CvPage() {
           {cv.name}
         </span>
         <div className="flex items-center gap-2">
-          <PrintButton compact />
-          {!IS_OPEN && <LockButton onLock={onLock} compact />}
+          <IconButton
+            icon={Printer}
+            label="Print"
+            title="Print this page"
+            onClick={() => window.print()}
+            hoverClassName="hover:border-primary hover:text-primary"
+            compact
+          />
+          {!IS_OPEN && (
+            <IconButton
+              icon={Lock}
+              label="Lock"
+              title="Lock this page"
+              onClick={onLock}
+              hoverClassName="hover:border-markup hover:text-markup"
+              compact
+            />
+          )}
         </div>
       </header>
 
@@ -120,8 +132,22 @@ function CvPage() {
               {cv.name} · {cv.location} · {new Date().getFullYear()}
             </p>
             <div className="no-print flex items-center gap-2">
-              <PrintButton />
-              {!IS_OPEN && <LockButton onLock={onLock} />}
+              <IconButton
+                icon={Printer}
+                label="Print"
+                title="Print this page"
+                onClick={() => window.print()}
+                hoverClassName="hover:border-primary hover:text-primary"
+              />
+              {!IS_OPEN && (
+                <IconButton
+                  icon={Lock}
+                  label="Lock"
+                  title="Lock this page"
+                  onClick={onLock}
+                  hoverClassName="hover:border-markup hover:text-markup"
+                />
+              )}
             </div>
           </div>
         </footer>
@@ -130,67 +156,42 @@ function CvPage() {
   );
 }
 
-function LockButton({ onLock, compact }: { onLock: () => void; compact?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onLock}
-      title="Lock this page"
-      className={cn(
-        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-markup hover:text-markup",
-        compact ? "px-2.5 py-1.5" : "px-3 py-2",
-      )}
-    >
-      <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-      Lock
-    </button>
-  );
-}
-
-function PrintButton({ compact }: { compact?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={() => window.print()}
-      title="Print this page"
-      className={cn(
-        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary hover:text-primary",
-        compact ? "px-2.5 py-1.5" : "px-3 py-2",
-      )}
-    >
-      <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-      Print
-    </button>
-  );
-}
-
-function SectionHeading({
-  id,
-  index,
+function IconButton({
   icon: Icon,
+  label,
   title,
+  onClick,
+  hoverClassName,
+  compact,
 }: {
-  id: string;
-  index: string;
   icon: React.ComponentType<{ className?: string }>;
+  label: string;
   title: string;
+  onClick: () => void;
+  hoverClassName: string;
+  compact?: boolean;
 }) {
   return (
-    <Reveal>
-      <div className="leader-line pb-4">
-        <p className="section-heading-label flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
-          <Icon className="section-heading-icon h-3.5 w-3.5" aria-hidden="true" />
-          {index} / {title}
-        </p>
-      </div>
-    </Reveal>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={cn(
+        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors",
+        hoverClassName,
+        compact ? "px-2.5 py-1.5" : "px-3 py-2",
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      {label}
+    </button>
   );
 }
 
 function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
   return (
     <section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
-      <SectionHeading id="profile" index="01" icon={IdCard} title="Profile" />
+      <SectionHeading index="01" icon={IdCard} title="Profile" />
 
       <div className="mt-10 grid gap-10 sm:grid-cols-[1fr_auto] sm:items-start">
         <div>
@@ -214,7 +215,11 @@ function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
           <Reveal delay={260}>
             <ul className="mt-8 flex flex-wrap gap-2">
               <ContactChip icon={Mail} label={cv.email} href={`mailto:${cv.email}`} />
-              <ContactChip icon={Phone} label={cv.phone} href={`tel:${cv.phone.replace(/\s/g, "")}`} />
+              <ContactChip
+                icon={Phone}
+                label={cv.phone}
+                href={`tel:${cv.phone.replace(/\s/g, "")}`}
+              />
               <ContactChip icon={MapPin} label={cv.location} />
               <ContactChip icon={Cake} label={cv.birthDate} />
             </ul>
@@ -282,7 +287,7 @@ function ContactChip({
 function Experience({ cv }: { cv: CvData }) {
   return (
     <section id="experience" className="mt-24 scroll-mt-24">
-      <SectionHeading id="experience" index="02" icon={BriefcaseBusiness} title="Work experience" />
+      <SectionHeading index="02" icon={BriefcaseBusiness} title="Work experience" />
 
       <ol className="mt-10 space-y-0">
         {cv.experience.map((job, i) => (
@@ -291,9 +296,7 @@ function Experience({ cv }: { cv: CvData }) {
               <span
                 className={cn(
                   "absolute top-1 -left-[7px] h-3 w-3 rounded-full border-2",
-                  job.current
-                    ? "border-markup bg-markup"
-                    : "border-primary bg-background",
+                  job.current ? "border-markup bg-markup" : "border-primary bg-background",
                 )}
                 aria-hidden="true"
               />
@@ -332,7 +335,7 @@ function Experience({ cv }: { cv: CvData }) {
 function Skills({ cv }: { cv: CvData }) {
   return (
     <section id="skills" className="mt-24 scroll-mt-24">
-      <SectionHeading id="skills" index="03" icon={Wrench} title="Skills & languages" />
+      <SectionHeading index="03" icon={Wrench} title="Skills & languages" />
 
       <div className="mt-10 grid gap-12 sm:grid-cols-2">
         <Reveal>
@@ -366,7 +369,8 @@ function Skills({ cv }: { cv: CvData }) {
           <div className="mt-6 flex items-center gap-3 border border-dashed border-border bg-card/60 px-4 py-3">
             <Car className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <span className="text-sm text-muted-foreground">
-              Driving license <span className="font-mono font-medium text-foreground">{cv.drivingLicense}</span>
+              Driving license{" "}
+              <span className="font-mono font-medium text-foreground">{cv.drivingLicense}</span>
             </span>
           </div>
         </Reveal>
@@ -378,15 +382,20 @@ function Skills({ cv }: { cv: CvData }) {
 function Education({ cv }: { cv: CvData }) {
   return (
     <section id="education" className="mt-24 scroll-mt-24">
-      <SectionHeading id="education" index="04" icon={GraduationCap} title="Education" />
+      <SectionHeading index="04" icon={GraduationCap} title="Education" />
 
       <ol className="mt-10 space-y-6">
         {cv.education.map((edu, i) => (
           <Reveal key={edu.field + edu.period} delay={i * 60}>
             <li className="group relative border border-border bg-card p-6 transition-colors hover:border-primary">
-              <div className="corner-ticks pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+              <div
+                className="corner-ticks pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+                aria-hidden="true"
+              />
               <h3 className="font-display text-xl font-semibold text-foreground">{edu.field}</h3>
-              <p className="mt-1 font-mono text-xs tracking-[0.1em] text-muted-foreground">{edu.period}</p>
+              <p className="mt-1 font-mono text-xs tracking-[0.1em] text-muted-foreground">
+                {edu.period}
+              </p>
               <p className="mt-2 text-sm text-foreground/85">{edu.school}</p>
               {edu.note && (
                 <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
@@ -407,7 +416,7 @@ function Education({ cv }: { cv: CvData }) {
 function Beyond({ cv }: { cv: CvData }) {
   return (
     <section id="beyond" className="mt-24 scroll-mt-24">
-      <SectionHeading id="beyond" index="05" icon={Gamepad2} title="Beyond work" />
+      <SectionHeading index="05" icon={Gamepad2} title="Beyond work" />
 
       <Reveal>
         <div className="mt-10 border border-border bg-card p-6 sm:p-8">

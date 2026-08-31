@@ -297,6 +297,8 @@
   body {
     height: auto !important;
     min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -313,12 +315,6 @@
     height: auto !important;
   }
 
-  html,
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
   .reveal {
     opacity: 1 !important;
     transform: none !important;
@@ -328,10 +324,6 @@
   /* Decorative background grid off — saves ink and avoids banding */
   .bg-blueprint-grid,
   .bg-blueprint-grid-lg {
-    display: none !important;
-  }
-
-  .fixed {
     display: none !important;
   }
 

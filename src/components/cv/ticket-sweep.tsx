@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Ticket as TicketIcon } from "lucide-react";
+import { SectionHeading } from "@/components/cv/section-heading";
 import { cn } from "@/lib/utils";
 
 // Krisztián's real best time — beat it.
@@ -37,10 +38,11 @@ const PRIORITY_COLOR: Record<PriorityTier, string> = {
   Major: "text-markup",
   Minor: "text-primary",
 };
+const ALL_PRIORITIES: PriorityTier[] = ["Critical", "Major", "Minor"];
 const DECOY_PRIORITY_POOL: PriorityTier[] = ["Major", "Minor"];
 const ASSIGNEE_POOL = ["@kvirag", "@jsmith", "@rchen", "@mpatel", "@dlee", "@sturner"];
 
-/** Deterministic PRNG so every round's board is identical across plays (needed for a future ghost-run replay to line up). */
+/** Deterministic PRNG so every round's board is identical across plays. */
 function mulberry32(seed: number) {
   let s = seed;
   return function random() {
@@ -82,7 +84,7 @@ function generateBoard(round: RoundDef, gameSeed: number): Ticket[] {
     } else {
       tickets.push({
         id,
-        priority: (["Critical", "Major", "Minor"] as const)[Math.floor(random() * 3)]!,
+        priority: ALL_PRIORITIES[Math.floor(random() * ALL_PRIORITIES.length)]!,
         assignee: isTarget
           ? "unassigned"
           : ASSIGNEE_POOL[Math.floor(random() * ASSIGNEE_POOL.length)]!,
@@ -141,12 +143,13 @@ export function TicketSweep() {
   const round = ROUNDS[roundIndex]!;
   const board = useMemo(() => generateBoard(round, gameSeed), [round, gameSeed]);
 
-  const elapsedMs =
-    phase === "finished" && finalMs !== null
-      ? finalMs
-      : startedAtRef.current !== null
-        ? performance.now() - startedAtRef.current + penaltyMsRef.current
-        : 0;
+  function liveElapsedMs(): number {
+    return startedAtRef.current !== null
+      ? performance.now() - startedAtRef.current + penaltyMsRef.current
+      : 0;
+  }
+
+  const elapsedMs = phase === "finished" && finalMs !== null ? finalMs : liveElapsedMs();
 
   function startGame() {
     setPhase("playing");
@@ -159,54 +162,52 @@ export function TicketSweep() {
     startedAtRef.current = performance.now();
   }
 
+  function advanceRound() {
+    setRoundIndex((r) => r + 1);
+    setFound(new Set());
+    setRoundClear(false);
+  }
+
+  function finishGame() {
+    const elapsed = liveElapsedMs();
+    setFinalMs(elapsed);
+    setPhase("finished");
+    setBestMs((prevBest) => {
+      const best = prevBest === null || elapsed < prevBest ? elapsed : prevBest;
+      try {
+        localStorage.setItem(BEST_KEY, String(best));
+      } catch {
+        // Private browsing / storage disabled — the run still completes fine.
+      }
+      return best;
+    });
+  }
+
   function handleTicketClick(ticket: Ticket) {
     if (phase !== "playing" || roundClear || found.has(ticket.id)) return;
 
-    if (ticket.isTarget) {
-      const next = new Set(found);
-      next.add(ticket.id);
-      setFound(next);
-      if (next.size === round.targetCount) {
-        setRoundClear(true);
-        roundTimeoutRef.current = setTimeout(() => {
-          if (roundIndex + 1 < ROUNDS.length) {
-            setRoundIndex((r) => r + 1);
-            setFound(new Set());
-            setRoundClear(false);
-          } else {
-            const elapsed =
-              performance.now() -
-              (startedAtRef.current ?? performance.now()) +
-              penaltyMsRef.current;
-            setFinalMs(elapsed);
-            setPhase("finished");
-            setBestMs((prevBest) => {
-              const best = prevBest === null || elapsed < prevBest ? elapsed : prevBest;
-              try {
-                localStorage.setItem(BEST_KEY, String(best));
-              } catch {
-                // Private browsing / storage disabled — the run still completes fine.
-              }
-              return best;
-            });
-          }
-        }, 700);
-      }
-    } else {
+    if (!ticket.isTarget) {
       penaltyMsRef.current += 1000;
       setFlashId(ticket.id);
       flashTimeoutRef.current = setTimeout(() => setFlashId(null), 220);
+      return;
     }
+
+    const next = new Set(found);
+    next.add(ticket.id);
+    setFound(next);
+    if (next.size !== round.targetCount) return;
+
+    setRoundClear(true);
+    roundTimeoutRef.current = setTimeout(() => {
+      if (roundIndex + 1 < ROUNDS.length) advanceRound();
+      else finishGame();
+    }, 700);
   }
 
   return (
     <div className="no-print mt-6">
-      <div className="leader-line pb-4">
-        <p className="section-heading-label flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
-          <TicketIcon className="section-heading-icon h-3.5 w-3.5" aria-hidden="true" />
-          bonus / ticket sweep
-        </p>
-      </div>
+      <SectionHeading index="bonus" icon={TicketIcon} title="ticket sweep" />
 
       <div className="mt-6 border border-dashed border-border bg-card/60 p-6 sm:p-8">
         {phase === "intro" && (
