@@ -99,7 +99,7 @@ function CvPage() {
         <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
           CV · {cv.name}
         </span>
-        <LockButton onLock={onLock} compact />
+        {!IS_OPEN && <LockButton onLock={onLock} compact />}
       </header>
 
       <main className="relative mx-auto max-w-3xl px-5 pb-24 sm:px-8">
@@ -123,7 +123,7 @@ function CvPage() {
                 <Printer className="h-3.5 w-3.5" aria-hidden="true" />
                 Print
               </button>
-              <LockButton onLock={onLock} />
+              {!IS_OPEN && <LockButton onLock={onLock} />}
             </div>
           </div>
         </footer>
