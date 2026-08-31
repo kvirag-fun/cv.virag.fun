@@ -18,6 +18,14 @@ export function UnlockScreen({ onUnlocked }: { onUnlocked: (value: UnlockedCv) =
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Open build (no passphrase configured): the screen is shown for reference
+    // only — Continue reveals the CV without any input.
+    if (IS_OPEN) {
+      const open = readOpenPayload();
+      saveUnlocked(open);
+      onUnlocked(open);
+      return;
+    }
     setPending(true);
     setError(false);
     try {
