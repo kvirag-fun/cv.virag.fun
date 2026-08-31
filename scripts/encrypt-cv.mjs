@@ -22,12 +22,6 @@ import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-const passphrase = process.env.SITE_PASSWORD?.trim();
-const locked = Boolean(passphrase && passphrase.length >= 8);
-if (passphrase && !locked) {
-  console.warn("SITE_PASSWORD is shorter than 8 characters — ignoring it and shipping open.");
-}
-
 // Output target:
 //  - CI (CV_SOURCE_JSON / CV_PORTRAIT_BASE64 env set, or no local source):
 //    writes the committed src/lib/cv-payload.ts.
