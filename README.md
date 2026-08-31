@@ -16,17 +16,29 @@ time with the **Lock** button.
 > Note: with any purely static site, the ciphertext is public by definition —
 > security rests entirely on the strength of the passphrase. Choose a long one.
 
+## Where the real data lives
+
+This repo is public, so it contains **no personal data** — only the lorem-ipsum
+placeholder in `scripts/cv-placeholder.json` and a blank portrait. The real CV
+is injected at build time from GitHub repository secrets
+(**Settings → Secrets and variables → Actions**):
+
+| Secret | Contents | If missing |
+| --- | --- | --- |
+| `CV_SOURCE_JSON` | the full CV JSON (paste the file contents) | lorem ipsum placeholder |
+| `CV_PORTRAIT_BASE64` | portrait photo, base64 (`base64 -w0 photo.jpg`) | blank portrait |
+| `SITE_PASSWORD` | passphrase visitors must type | gate bypassed, site open |
+
+Changing a secret takes effect on the next build/deploy. `scripts/cv-source.json`
+and `src/assets/portrait.jpg` are git-ignored — use them only for local previews.
+
 ## Editing the CV
 
-1. Edit `scripts/cv-source.json` (all CV content) and/or replace
-   `src/assets/portrait.jpg`.
-2. Re-encrypt the payload:
+Update the `CV_SOURCE_JSON` secret and re-run the workflow, or locally:
 
-   ```sh
-   SITE_PASSWORD="your-secret-passphrase" node scripts/encrypt-cv.mjs
-   ```
-
-   To change the passphrase, just run the command again with the new one.
+```sh
+SITE_PASSWORD="your-secret-passphrase" node scripts/encrypt-cv.mjs
+```
 
 ## Deploying to GitHub Pages
 
@@ -34,7 +46,8 @@ time with the **Lock** button.
 
 The repo includes `.github/workflows/deploy.yml`. Push to `main`, then in the
 GitHub repo go to **Settings → Pages → Source → GitHub Actions**. Every push
-builds and deploys automatically.
+builds and deploys automatically, encrypting the secrets into the payload.
+
 
 ### Option B — Manual
 
