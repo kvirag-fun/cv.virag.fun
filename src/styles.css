@@ -285,6 +285,14 @@
     width: 18px !important;
   }
 
+  /* max-w-xl (36rem) shrinks with the root-font trick same as everything
+     else rem-based, but the tagline's now-fixed 8px text doesn't — so the
+     column ends up far narrower than it needs to be and the sentence wraps
+     to 3 short lines instead of using the grid column's actual width. */
+  .hero-tagline {
+    max-width: none !important;
+  }
+
   html,
   body {
     height: auto !important;
