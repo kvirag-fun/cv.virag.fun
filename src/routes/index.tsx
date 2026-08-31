@@ -5,6 +5,7 @@ import {
   Mail,
   Phone,
   Cake,
+  IdCard,
   BriefcaseBusiness,
   Wrench,
   GraduationCap,
@@ -187,8 +188,10 @@ function SectionHeading({
 
 function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
   return (
-<section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
-      <div className="mt-2 grid gap-10 sm:grid-cols-[1fr_auto] sm:items-start">
+    <section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
+      <SectionHeading id="profile" index="01" icon={IdCard} title="Profile" />
+
+      <div className="mt-10 grid gap-10 sm:grid-cols-[1fr_auto] sm:items-start">
         <div>
           <Reveal delay={80}>
             <h1 className="font-display text-5xl leading-[1.05] font-semibold tracking-tight text-foreground sm:text-6xl">
