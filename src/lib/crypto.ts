@@ -2,7 +2,7 @@
 // ciphertext (src/lib/cv-payload.ts); the key is derived from the visitor's
 // passphrase with PBKDF2-SHA256 (600k iterations) and never leaves the browser.
 
-import { CV_PAYLOAD } from "./cv-payload";
+import { CV_PAYLOAD } from "@/lib/cv-payload";
 import type { CvData } from "./cv-types";
 
 export interface UnlockedCv {
