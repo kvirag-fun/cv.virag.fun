@@ -386,12 +386,12 @@ function Education({ cv }: { cv: CvData }) {
               <div className="corner-ticks pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
               <h3 className="font-display text-xl font-semibold text-foreground">{edu.field}</h3>
               <p className="mt-1 font-mono text-xs tracking-[0.1em] text-muted-foreground">{edu.period}</p>
-              <p className="mt-2 text-sm text-foreground/85">{edu.school}</p>
               {edu.note && (
-                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
+                <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
                   {edu.note}
                 </p>
               )}
+              <p className={cn("text-sm text-foreground/85", edu.note ? "mt-1" : "mt-2")}>{edu.school}</p>
               <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
                 {edu.location}
               </p>
