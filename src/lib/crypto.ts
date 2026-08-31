@@ -58,9 +58,23 @@ async function decryptBytes(key: CryptoKey, iv: string, data: string): Promise<A
   );
 }
 
+// True when the build had no passphrase configured — the payload ships in the
+// clear and the gate is bypassed entirely.
+export const IS_OPEN: boolean = CV_PAYLOAD.locked === false;
+
+// Reads an unencrypted (open) payload straight out of the bundle.
+export function readOpenPayload(): UnlockedCv {
+  const cv = JSON.parse(new TextDecoder().decode(b64ToBytes(CV_PAYLOAD.cv.data))) as CvData;
+  return {
+    cv,
+    portraitDataUrl: `data:${CV_PAYLOAD.portrait.type};base64,${CV_PAYLOAD.portrait.data}`,
+  };
+}
+
 // Returns the decrypted CV, or null when the passphrase is wrong —
 // AES-GCM authentication fails on any mismatch, no separate check needed.
 export async function unlockWithPassphrase(passphrase: string): Promise<UnlockedCv | null> {
+  if (IS_OPEN) return readOpenPayload();
   try {
     const key = await deriveKey(passphrase);
     const cvBytes = await decryptBytes(key, CV_PAYLOAD.cv.iv, CV_PAYLOAD.cv.data);
@@ -72,6 +86,7 @@ export async function unlockWithPassphrase(passphrase: string): Promise<Unlocked
     return null;
   }
 }
+
 
 // Persist the unlocked payload for the tab session so a refresh stays unlocked.
 export function saveUnlocked(value: UnlockedCv): void {
