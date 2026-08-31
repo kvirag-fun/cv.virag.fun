@@ -25,11 +25,14 @@ jobs:
       - run: bun install --frozen-lockfile
 
       - name: Encrypt / pack CV content
-        # Both secrets are optional. Without SITE_PASSWORD the gate is bypassed;
-        # without CV_SOURCE_JSON the lorem-ipsum placeholder CV is used.
+        # All three secrets are optional. Without SITE_PASSWORD the gate is
+        # bypassed; without CV_SOURCE_JSON / CV_PORTRAIT_BASE64 the lorem-ipsum
+        # placeholder CV and a blank portrait are used. The repo itself only
+        # ever contains placeholder data.
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
           CV_SOURCE_JSON: ${{ secrets.CV_SOURCE_JSON }}
+          CV_PORTRAIT_BASE64: ${{ secrets.CV_PORTRAIT_BASE64 }}
         run: node scripts/encrypt-cv.mjs
 
       - name: Build static site
