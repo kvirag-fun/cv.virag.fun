@@ -2,9 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Ticket as TicketIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Placeholder "beat my time" target — replace with a real recorded run once
-// you've actually played it yourself.
-const GHOST_MS = 24000;
+// Krisztián's real best time — beat it.
+const GHOST_MS = 14800;
 const BEST_KEY = "ticket-sweep-best-ms";
 
 type PriorityTier = "Critical" | "Major" | "Minor";
