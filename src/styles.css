@@ -269,13 +269,20 @@
     font-size: 5.5px !important;
   }
 
+  /* Section headings ("01 / PROFILE", ...) share the text-[11px] class with
+     several unrelated meta labels, so they can't just ride that rule — bump
+     them on their own to the second-largest size on the page, right under
+     the name. */
+  .section-heading-label {
+    font-size: 14px !important;
+  }
+
   /* The section-heading icon is sized in rem (h-3.5/w-3.5), so it shrinks
-     with the root-font trick above while the label text next to it is now a
-     hardcoded px size — left alone it prints noticeably smaller than the
-     text it sits beside. Pin it to match. */
+     with the root-font trick above and doesn't track the label's print
+     size at all. Scale it up to match the enlarged label. */
   .section-heading-icon {
-    height: 7.5px !important;
-    width: 7.5px !important;
+    height: 18px !important;
+    width: 18px !important;
   }
 
   html,
