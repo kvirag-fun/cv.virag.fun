@@ -205,7 +205,7 @@ function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
             </p>
           </Reveal>
           <Reveal delay={200}>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="hero-tagline mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
               {cv.tagline}
             </p>
           </Reveal>
