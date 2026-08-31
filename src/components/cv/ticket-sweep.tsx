@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 const GHOST_MS = 24000;
 const BEST_KEY = "ticket-sweep-best-ms";
 
+type PriorityTier = "Critical" | "Major" | "Minor";
+
 interface Ticket {
   id: string;
-  priority: "P0" | "P1" | "P2" | "P3";
+  priority: PriorityTier;
   assignee: string;
   isTarget: boolean;
 }
@@ -19,40 +21,24 @@ interface RoundDef {
   count: number;
   targetCount: number;
   mode: "priority" | "unassigned";
-  instruction: string;
   showPriorityColor: boolean;
 }
 
 // count is a multiple of 8 (the desktop grid's column count) so the board
 // comes out to an exact number of rows there: 3, then 4, then 5.
 const ROUNDS: RoundDef[] = [
-  {
-    seed: 1001,
-    count: 24,
-    targetCount: 4,
-    mode: "priority",
-    instruction: "Find every P0 ticket",
-    showPriorityColor: true,
-  },
-  {
-    seed: 2002,
-    count: 32,
-    targetCount: 5,
-    mode: "priority",
-    instruction: "Find every P0 ticket",
-    showPriorityColor: false,
-  },
-  {
-    seed: 3003,
-    count: 40,
-    targetCount: 6,
-    mode: "unassigned",
-    instruction: "Find every unassigned ticket",
-    showPriorityColor: false,
-  },
+  { seed: 1001, count: 24, targetCount: 4, mode: "priority", showPriorityColor: true },
+  { seed: 2002, count: 32, targetCount: 5, mode: "priority", showPriorityColor: false },
+  { seed: 3003, count: 40, targetCount: 6, mode: "unassigned", showPriorityColor: false },
 ];
 
-const PRIORITY_POOL: Ticket["priority"][] = ["P1", "P2", "P3"];
+// Reuse the site's existing accent tokens instead of inventing new colors.
+const PRIORITY_COLOR: Record<PriorityTier, string> = {
+  Critical: "text-destructive",
+  Major: "text-markup",
+  Minor: "text-primary",
+};
+const DECOY_PRIORITY_POOL: PriorityTier[] = ["Major", "Minor"];
 const ASSIGNEE_POOL = ["@kv", "@jsmith", "@anna", "@marek", "@dlee", "@nova"];
 
 /** Deterministic PRNG so every round's board is identical across plays (needed for a future ghost-run replay to line up). */
@@ -88,14 +74,16 @@ function generateBoard(round: RoundDef, gameSeed: number): Ticket[] {
     if (round.mode === "priority") {
       tickets.push({
         id,
-        priority: isTarget ? "P0" : PRIORITY_POOL[Math.floor(random() * PRIORITY_POOL.length)]!,
+        priority: isTarget
+          ? "Critical"
+          : DECOY_PRIORITY_POOL[Math.floor(random() * DECOY_PRIORITY_POOL.length)]!,
         assignee: ASSIGNEE_POOL[Math.floor(random() * ASSIGNEE_POOL.length)]!,
         isTarget,
       });
     } else {
       tickets.push({
         id,
-        priority: (["P0", "P1", "P2", "P3"] as const)[Math.floor(random() * 4)]!,
+        priority: (["Critical", "Major", "Minor"] as const)[Math.floor(random() * 3)]!,
         assignee: isTarget
           ? "unassigned"
           : ASSIGNEE_POOL[Math.floor(random() * ASSIGNEE_POOL.length)]!,
@@ -248,7 +236,15 @@ export function TicketSweep() {
           <div>
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
               <p className="font-mono text-xs uppercase tracking-[0.15em] text-primary">
-                Round {roundIndex + 1} / {ROUNDS.length} · {round.instruction}
+                Round {roundIndex + 1} / {ROUNDS.length} · Find every{" "}
+                {round.mode === "priority" ? (
+                  <span className={round.showPriorityColor ? "text-destructive" : undefined}>
+                    Critical
+                  </span>
+                ) : (
+                  "unassigned"
+                )}{" "}
+                ticket
               </p>
               <div className="flex items-center gap-4 font-mono text-xs tracking-[0.1em] text-muted-foreground">
                 <span>
@@ -286,11 +282,11 @@ export function TicketSweep() {
                       <span>{ticket.id}</span>
                       {round.mode === "priority" ? (
                         <span
-                          className={cn(
-                            round.showPriorityColor && ticket.priority === "P0"
-                              ? "text-markup"
-                              : "text-muted-foreground",
-                          )}
+                          className={
+                            round.showPriorityColor
+                              ? PRIORITY_COLOR[ticket.priority]
+                              : "text-muted-foreground"
+                          }
                         >
                           {ticket.priority}
                         </span>
