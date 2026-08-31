@@ -94,12 +94,15 @@ function CvPage() {
 
       <SideNav sections={SECTIONS} />
 
-      {/* Mobile top bar */}
-      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur xl:hidden">
+      {/* Top bar */}
+      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
         <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
           CV · {cv.name}
         </span>
-        {!IS_OPEN && <LockButton onLock={onLock} compact />}
+        <div className="flex items-center gap-2">
+          <PrintButton compact />
+          {!IS_OPEN && <LockButton onLock={onLock} compact />}
+        </div>
       </header>
 
       <main className="relative mx-auto max-w-3xl px-5 pb-24 sm:px-8">
@@ -115,14 +118,7 @@ function CvPage() {
               {cv.name} · {cv.location} · {new Date().getFullYear()}
             </p>
             <div className="no-print flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="flex items-center gap-2 border border-border bg-card px-3 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-              >
-                <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-                Print
-              </button>
+              <PrintButton />
               {!IS_OPEN && <LockButton onLock={onLock} />}
             </div>
           </div>
@@ -145,6 +141,23 @@ function LockButton({ onLock, compact }: { onLock: () => void; compact?: boolean
     >
       <Lock className="h-3.5 w-3.5" aria-hidden="true" />
       Lock
+    </button>
+  );
+}
+
+function PrintButton({ compact }: { compact?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={() => window.print()}
+      title="Print this page"
+      className={cn(
+        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary hover:text-primary",
+        compact ? "px-2.5 py-1.5" : "px-3 py-2",
+      )}
+    >
+      <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+      Print
     </button>
   );
 }
