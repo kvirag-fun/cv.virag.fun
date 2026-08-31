@@ -1,0 +1,319 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Ticket as TicketIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Placeholder "beat my time" target — replace with a real recorded run once
+// you've actually played it yourself.
+const GHOST_MS = 24000;
+const BEST_KEY = "ticket-sweep-best-ms";
+
+interface Ticket {
+  id: string;
+  priority: "P0" | "P1" | "P2" | "P3";
+  assignee: string;
+  isTarget: boolean;
+}
+
+interface RoundDef {
+  seed: number;
+  count: number;
+  targetCount: number;
+  mode: "priority" | "unassigned";
+  instruction: string;
+  showPriorityColor: boolean;
+}
+
+const ROUNDS: RoundDef[] = [
+  {
+    seed: 1001,
+    count: 18,
+    targetCount: 4,
+    mode: "priority",
+    instruction: "Find every P0 ticket",
+    showPriorityColor: true,
+  },
+  {
+    seed: 2002,
+    count: 28,
+    targetCount: 5,
+    mode: "priority",
+    instruction: "Find every P0 ticket",
+    showPriorityColor: false,
+  },
+  {
+    seed: 3003,
+    count: 38,
+    targetCount: 6,
+    mode: "unassigned",
+    instruction: "Find every unassigned ticket",
+    showPriorityColor: false,
+  },
+];
+
+const PRIORITY_POOL: Ticket["priority"][] = ["P1", "P2", "P3"];
+const ASSIGNEE_POOL = ["@kv", "@jsmith", "@anna", "@marek", "@dlee", "@nova"];
+
+/** Deterministic PRNG so every round's board is identical across plays (needed for a future ghost-run replay to line up). */
+function mulberry32(seed: number) {
+  let s = seed;
+  return function random() {
+    s |= 0;
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffledIndices(random: () => number, n: number): number[] {
+  const arr = Array.from({ length: n }, (_, i) => i);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j]!, arr[i]!];
+  }
+  return arr;
+}
+
+function generateBoard(round: RoundDef): Ticket[] {
+  const random = mulberry32(round.seed);
+  const targetSlots = new Set(shuffledIndices(random, round.count).slice(0, round.targetCount));
+  const tickets: Ticket[] = [];
+  for (let i = 0; i < round.count; i++) {
+    const id = `TCK-${1000 + Math.floor(random() * 9000)}`;
+    const isTarget = targetSlots.has(i);
+    if (round.mode === "priority") {
+      tickets.push({
+        id,
+        priority: isTarget ? "P0" : PRIORITY_POOL[Math.floor(random() * PRIORITY_POOL.length)]!,
+        assignee: ASSIGNEE_POOL[Math.floor(random() * ASSIGNEE_POOL.length)]!,
+        isTarget,
+      });
+    } else {
+      tickets.push({
+        id,
+        priority: (["P0", "P1", "P2", "P3"] as const)[Math.floor(random() * 4)]!,
+        assignee: isTarget
+          ? "unassigned"
+          : ASSIGNEE_POOL[Math.floor(random() * ASSIGNEE_POOL.length)]!,
+        isTarget,
+      });
+    }
+  }
+  return tickets;
+}
+
+function formatMs(ms: number): string {
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+type Phase = "intro" | "playing" | "finished";
+
+/** A timed 3-round "find the ticket" mini-game — the mini-game equivalent of the Sudoku/Tic-Tac-Toe hobby mentioned above. */
+export function TicketSweep() {
+  const [phase, setPhase] = useState<Phase>("intro");
+  const [roundIndex, setRoundIndex] = useState(0);
+  const [found, setFound] = useState<Set<string>>(new Set());
+  const [flashId, setFlashId] = useState<string | null>(null);
+  const [roundClear, setRoundClear] = useState(false);
+  const [finalMs, setFinalMs] = useState<number | null>(null);
+  const [bestMs, setBestMs] = useState<number | null>(null);
+  const [, forceTick] = useState(0);
+
+  const startedAtRef = useRef<number | null>(null);
+  const penaltyMsRef = useRef(0);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(BEST_KEY);
+      if (stored) setBestMs(Number(stored));
+    } catch {
+      // Private browsing / storage disabled — just skip the best-time compare.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const interval = setInterval(() => forceTick((n) => n + 1), 100);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+      if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+    };
+  }, []);
+
+  const round = ROUNDS[roundIndex]!;
+  const board = useMemo(() => generateBoard(round), [round]);
+
+  const elapsedMs =
+    phase === "finished" && finalMs !== null
+      ? finalMs
+      : startedAtRef.current !== null
+        ? performance.now() - startedAtRef.current + penaltyMsRef.current
+        : 0;
+
+  function startGame() {
+    setPhase("playing");
+    setRoundIndex(0);
+    setFound(new Set());
+    setRoundClear(false);
+    setFinalMs(null);
+    penaltyMsRef.current = 0;
+    startedAtRef.current = performance.now();
+  }
+
+  function handleTicketClick(ticket: Ticket) {
+    if (phase !== "playing" || roundClear || found.has(ticket.id)) return;
+
+    if (ticket.isTarget) {
+      const next = new Set(found);
+      next.add(ticket.id);
+      setFound(next);
+      if (next.size === round.targetCount) {
+        setRoundClear(true);
+        roundTimeoutRef.current = setTimeout(() => {
+          if (roundIndex + 1 < ROUNDS.length) {
+            setRoundIndex((r) => r + 1);
+            setFound(new Set());
+            setRoundClear(false);
+          } else {
+            const elapsed =
+              performance.now() -
+              (startedAtRef.current ?? performance.now()) +
+              penaltyMsRef.current;
+            setFinalMs(elapsed);
+            setPhase("finished");
+            setBestMs((prevBest) => {
+              const best = prevBest === null || elapsed < prevBest ? elapsed : prevBest;
+              try {
+                localStorage.setItem(BEST_KEY, String(best));
+              } catch {
+                // Private browsing / storage disabled — the run still completes fine.
+              }
+              return best;
+            });
+          }
+        }, 700);
+      }
+    } else {
+      penaltyMsRef.current += 1000;
+      setFlashId(ticket.id);
+      flashTimeoutRef.current = setTimeout(() => setFlashId(null), 220);
+    }
+  }
+
+  return (
+    <div className="no-print mt-6 border border-dashed border-border bg-card/60 p-6 sm:p-8">
+      <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
+        <TicketIcon className="h-3.5 w-3.5" aria-hidden="true" />
+        bonus / ticket sweep
+      </p>
+
+      {phase === "intro" && (
+        <div className="mt-6">
+          <p className="max-w-xl text-sm leading-relaxed text-foreground/85">
+            Three rounds, one stopwatch. Click every ticket that matches the round&apos;s target
+            before moving on — the boards get bigger and the tells get subtler each round. A wrong
+            click costs a 1s penalty.
+          </p>
+          <button
+            type="button"
+            onClick={startGame}
+            className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
+          >
+            Start
+          </button>
+          {bestMs !== null && (
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+              Your best: {formatMs(bestMs)} · Beat my time: {formatMs(GHOST_MS)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {phase === "playing" && (
+        <div className="mt-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-primary">
+              Round {roundIndex + 1} / {ROUNDS.length} · {round.instruction}
+            </p>
+            <div className="flex items-center gap-4 font-mono text-xs tracking-[0.1em] text-muted-foreground">
+              <span>
+                {found.size} / {round.targetCount}
+              </span>
+              <span className="text-foreground">{formatMs(elapsedMs)}</span>
+            </div>
+          </div>
+
+          {roundClear ? (
+            <p className="mt-8 text-center font-mono text-sm uppercase tracking-[0.2em] text-markup">
+              Round clear
+            </p>
+          ) : (
+            <div className="mt-4 grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
+              {board.map((ticket) => {
+                const isFound = found.has(ticket.id);
+                const isFlashing = flashId === ticket.id;
+                return (
+                  <button
+                    key={ticket.id}
+                    type="button"
+                    onClick={() => handleTicketClick(ticket)}
+                    disabled={isFound}
+                    className={cn(
+                      "flex flex-col items-start gap-0.5 border px-1.5 py-1 text-left font-mono text-[9px] transition-colors",
+                      isFound &&
+                        "border-border bg-background text-muted-foreground/40 line-through",
+                      isFlashing && "border-destructive bg-destructive/10 text-destructive",
+                      !isFound &&
+                        !isFlashing &&
+                        "border-border bg-background text-foreground/85 hover:border-primary",
+                    )}
+                  >
+                    <span>{ticket.id}</span>
+                    {round.mode === "priority" ? (
+                      <span
+                        className={cn(
+                          round.showPriorityColor && ticket.priority === "P0"
+                            ? "text-markup"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        {ticket.priority}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">{ticket.assignee}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {phase === "finished" && finalMs !== null && (
+        <div className="mt-6">
+          <p className="font-mono text-2xl text-foreground">{formatMs(finalMs)}</p>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+            Your best: {formatMs(bestMs ?? finalMs)} · Beat my time: {formatMs(GHOST_MS)}
+          </p>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
+            {finalMs < GHOST_MS ? "You beat my time." : "Still chasing my time."}
+          </p>
+          <button
+            type="button"
+            onClick={startGame}
+            className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
+          >
+            Play again
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
