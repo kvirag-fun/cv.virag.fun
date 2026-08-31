@@ -208,10 +208,12 @@ export function TicketSweep() {
 
   return (
     <div className="no-print mt-6 border border-dashed border-border bg-card/60 p-6 sm:p-8">
-      <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
-        <TicketIcon className="h-3.5 w-3.5" aria-hidden="true" />
-        bonus / ticket sweep
-      </p>
+      <div className="leader-line pb-4">
+        <p className="section-heading-label flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
+          <TicketIcon className="section-heading-icon h-3.5 w-3.5" aria-hidden="true" />
+          bonus / ticket sweep
+        </p>
+      </div>
 
       {phase === "intro" && (
         <div className="mt-6">
