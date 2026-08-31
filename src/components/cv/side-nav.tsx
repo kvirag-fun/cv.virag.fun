@@ -16,36 +16,36 @@ export function SideNav({ sections }: SideNavProps) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        }
-      },
-      { rootMargin: "-30% 0px -60% 0px" },
-    );
-    for (const s of sections) {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    }
+    // IntersectionObserver's callback batching isn't reliable for fast
+    // anchor-jump scrolls (a big instant scroll can skip straight past its
+    // narrow "active" band without ever firing for the section landed on),
+    // so compute the active section directly from scroll position instead —
+    // the standard scrollspy approach: the last section whose top has
+    // crossed a fixed trigger line is the active one.
+    function updateActive() {
+      const triggerY = window.innerHeight * 0.35;
+      let currentId = sections[0]?.id ?? "";
+      for (const s of sections) {
+        const el = document.getElementById(s.id);
+        if (el && el.getBoundingClientRect().top <= triggerY) currentId = s.id;
+      }
 
-    // The last section can be shorter than the page's remaining scroll room,
-    // so its top never reaches the observer's shrunk "active" band (there's
-    // nowhere further to scroll to) and it never fires as intersecting.
-    // Force it active once the page is scrolled to the bottom.
-    function handleScroll() {
-      const lastId = sections[sections.length - 1]?.id;
-      if (!lastId) return;
+      // The last section can be shorter than the page's remaining scroll
+      // room, so its top may never cross the trigger line (nowhere further
+      // to scroll to). Force it active once scrolled to the very bottom.
       const atBottom =
         window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
-      if (atBottom) setActive(lastId);
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+      if (atBottom) currentId = sections[sections.length - 1]?.id ?? currentId;
 
+      setActive(currentId);
+    }
+
+    updateActive();
+    window.addEventListener("scroll", updateActive, { passive: true });
+    window.addEventListener("resize", updateActive);
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", updateActive);
+      window.removeEventListener("resize", updateActive);
     };
   }, [sections]);
 
