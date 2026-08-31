@@ -59,8 +59,9 @@ function CvPage() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // No passphrase was configured at build time — show the CV right away.
-    setUnlocked(IS_OPEN ? readOpenPayload() : loadUnlocked());
+    // Even in open mode the passphrase screen is shown first (with a Continue
+    // button instead of an input), so the gate stays part of the experience.
+    setUnlocked(loadUnlocked());
     setChecked(true);
   }, []);
 
