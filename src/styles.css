@@ -238,6 +238,37 @@
     scroll-behavior: auto;
   }
 
+  /* Collapse the page's many on-screen text sizes to one 5-step print scale.
+     The rem-based Tailwind classes (text-sm, text-2xl, ...) already shrink
+     with the root font-size above, but the arbitrary px sizes used for mono
+     labels (text-[10px], text-[11px]) don't scale with it, so on their own
+     they'd print far larger than the surrounding headings and body text.
+     Hardcoding every size here keeps the ratio between them deterministic. */
+  .text-5xl,
+  .text-6xl {
+    font-size: 20px !important;
+  }
+
+  .text-2xl,
+  .text-xl {
+    font-size: 11px !important;
+  }
+
+  .text-lg,
+  .text-base,
+  .text-sm {
+    font-size: 8px !important;
+  }
+
+  .text-xs,
+  .text-\[11px\] {
+    font-size: 6.5px !important;
+  }
+
+  .text-\[10px\] {
+    font-size: 5.5px !important;
+  }
+
   html,
   body {
     height: auto !important;
