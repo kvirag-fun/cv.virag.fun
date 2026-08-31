@@ -239,7 +239,7 @@ function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
       <div className="mt-10 space-y-4">
         {cv.about.map((paragraph, i) => (
           <Reveal key={i} delay={100 + i * 80}>
-            <p className="max-w-2xl leading-relaxed text-foreground/85">{paragraph}</p>
+            <p className="max-w-2xl text-base leading-relaxed text-foreground/85">{paragraph}</p>
           </Reveal>
         ))}
       </div>
@@ -410,7 +410,7 @@ function Beyond({ cv }: { cv: CvData }) {
 
       <Reveal>
         <div className="mt-10 border border-border bg-card p-6 sm:p-8">
-          <p className="max-w-2xl leading-relaxed text-foreground/85">{cv.interests}</p>
+          <p className="max-w-2xl text-base leading-relaxed text-foreground/85">{cv.interests}</p>
           <ul className="mt-6 flex flex-wrap gap-2">
             {cv.interestTags.map((tag) => (
               <li
