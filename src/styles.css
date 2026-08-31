@@ -202,6 +202,35 @@
     margin: 8mm;
   }
 
+  /* Collapse the design tokens to grayscale so every color/border/background
+     utility on the page (they all resolve through these vars) prints as
+     black on white instead of mid-value grays a B&W printer can't render
+     with much contrast. */
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.15 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.15 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.15 0 0);
+    --primary: oklch(0.15 0 0);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(1 0 0);
+    --secondary-foreground: oklch(0.15 0 0);
+    --muted: oklch(1 0 0);
+    --muted-foreground: oklch(0.35 0 0);
+    --accent: oklch(1 0 0);
+    --accent-foreground: oklch(0.15 0 0);
+    --border: oklch(0.65 0 0);
+    --input: oklch(0.65 0 0);
+    --ring: oklch(0.15 0 0);
+    --blueprint: oklch(0.15 0 0);
+    --blueprint-soft: oklch(1 0 0);
+    --markup: oklch(0.15 0 0);
+    --markup-soft: oklch(1 0 0);
+    --grid-line: oklch(1 0 0);
+  }
+
   /* Tailwind sizing is rem-based, so shrinking the root font scales the whole
      document down proportionally to fit one A4 sheet. */
   html {
