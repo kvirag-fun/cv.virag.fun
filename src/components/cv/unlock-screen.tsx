@@ -110,7 +110,7 @@ export function UnlockScreen({ onUnlocked }: { onUnlocked: (value: UnlockedCv) =
             disabled={pending}
             className="group flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 font-mono text-sm font-medium uppercase tracking-[0.15em] text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
           >
-            {pending ? "Decrypting…" : "Unlock"}
+            {IS_OPEN ? "Continue" : pending ? "Decrypting…" : "Unlock"}
             <ArrowRight
               className="h-4 w-4 transition-transform group-hover:translate-x-1"
               aria-hidden="true"
