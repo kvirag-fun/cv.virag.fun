@@ -18,7 +18,6 @@ import {
   clearUnlocked,
   loadUnlocked,
   IS_OPEN,
-  readOpenPayload,
   type UnlockedCv,
 } from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
