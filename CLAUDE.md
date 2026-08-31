@@ -8,3 +8,4 @@ Rules for Claude Code to abide by:
 6. The image shown in the CV is is injected during the build via secrets named CV_PORTRAIT_BASE64.
 7. The deployed website files are encrypted, the encryption key is injected during the build via secrets named SITE_PASSWORD.
 8. Secrets are stored within the private repo cv.virag.fun_private with the same name as the secrets.
+9. If the agent is instructed to change any information contained in any of the files in the cv.virag.fun_private repo, those changes should submitted as well.
