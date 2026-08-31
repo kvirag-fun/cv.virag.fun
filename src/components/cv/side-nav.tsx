@@ -28,7 +28,25 @@ export function SideNav({ sections }: SideNavProps) {
       const el = document.getElementById(s.id);
       if (el) observer.observe(el);
     }
-    return () => observer.disconnect();
+
+    // The last section can be shorter than the page's remaining scroll room,
+    // so its top never reaches the observer's shrunk "active" band (there's
+    // nowhere further to scroll to) and it never fires as intersecting.
+    // Force it active once the page is scrolled to the bottom.
+    function handleScroll() {
+      const lastId = sections[sections.length - 1]?.id;
+      if (!lastId) return;
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom) setActive(lastId);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [sections]);
 
   return (
