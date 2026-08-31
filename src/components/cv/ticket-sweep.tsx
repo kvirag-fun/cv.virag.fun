@@ -207,7 +207,7 @@ export function TicketSweep() {
   }
 
   return (
-    <div className="no-print mt-6 border border-dashed border-border bg-card/60 p-6 sm:p-8">
+    <div className="no-print mt-6">
       <div className="leader-line pb-4">
         <p className="section-heading-label flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-markup">
           <TicketIcon className="section-heading-icon h-3.5 w-3.5" aria-hidden="true" />
@@ -215,107 +215,109 @@ export function TicketSweep() {
         </p>
       </div>
 
-      {phase === "intro" && (
-        <div className="mt-6">
-          <p className="max-w-xl text-sm leading-relaxed text-foreground/85">
-            Three rounds, one stopwatch. Click every ticket that matches the round&apos;s target
-            before moving on — the boards get bigger and the tells get subtler each round. A wrong
-            click costs a 1s penalty.
-          </p>
-          <button
-            type="button"
-            onClick={startGame}
-            className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
-          >
-            Start
-          </button>
-          {bestMs !== null && (
-            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-              Your best: {formatMs(bestMs)} · Beat my time: {formatMs(GHOST_MS)}
+      <div className="mt-6 border border-dashed border-border bg-card/60 p-6 sm:p-8">
+        {phase === "intro" && (
+          <div>
+            <p className="max-w-xl text-sm leading-relaxed text-foreground/85">
+              Three rounds, one stopwatch. Click every ticket that matches the round&apos;s target
+              before moving on — the boards get bigger and the tells get subtler each round. A wrong
+              click costs a 1s penalty.
             </p>
-          )}
-        </div>
-      )}
-
-      {phase === "playing" && (
-        <div className="mt-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-            <p className="font-mono text-xs uppercase tracking-[0.15em] text-primary">
-              Round {roundIndex + 1} / {ROUNDS.length} · {round.instruction}
-            </p>
-            <div className="flex items-center gap-4 font-mono text-xs tracking-[0.1em] text-muted-foreground">
-              <span>
-                {found.size} / {round.targetCount}
-              </span>
-              <span className="text-foreground">{formatMs(elapsedMs)}</span>
-            </div>
+            <button
+              type="button"
+              onClick={startGame}
+              className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
+            >
+              Start
+            </button>
+            {bestMs !== null && (
+              <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                Your best: {formatMs(bestMs)} · Beat my time: {formatMs(GHOST_MS)}
+              </p>
+            )}
           </div>
+        )}
 
-          {roundClear ? (
-            <p className="mt-8 text-center font-mono text-sm uppercase tracking-[0.2em] text-markup">
-              Round clear
-            </p>
-          ) : (
-            <div className="mt-4 grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
-              {board.map((ticket) => {
-                const isFound = found.has(ticket.id);
-                const isFlashing = flashId === ticket.id;
-                return (
-                  <button
-                    key={ticket.id}
-                    type="button"
-                    onClick={() => handleTicketClick(ticket)}
-                    disabled={isFound}
-                    className={cn(
-                      "flex flex-col items-start gap-0.5 border px-1.5 py-1 text-left font-mono text-[9px] transition-colors",
-                      isFound &&
-                        "border-border bg-background text-muted-foreground/40 line-through",
-                      isFlashing && "border-destructive bg-destructive/10 text-destructive",
-                      !isFound &&
-                        !isFlashing &&
-                        "border-border bg-background text-foreground/85 hover:border-primary",
-                    )}
-                  >
-                    <span>{ticket.id}</span>
-                    {round.mode === "priority" ? (
-                      <span
-                        className={cn(
-                          round.showPriorityColor && ticket.priority === "P0"
-                            ? "text-markup"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        {ticket.priority}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">{ticket.assignee}</span>
-                    )}
-                  </button>
-                );
-              })}
+        {phase === "playing" && (
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+              <p className="font-mono text-xs uppercase tracking-[0.15em] text-primary">
+                Round {roundIndex + 1} / {ROUNDS.length} · {round.instruction}
+              </p>
+              <div className="flex items-center gap-4 font-mono text-xs tracking-[0.1em] text-muted-foreground">
+                <span>
+                  {found.size} / {round.targetCount}
+                </span>
+                <span className="text-foreground">{formatMs(elapsedMs)}</span>
+              </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {phase === "finished" && finalMs !== null && (
-        <div className="mt-6">
-          <p className="font-mono text-2xl text-foreground">{formatMs(finalMs)}</p>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-            Your best: {formatMs(bestMs ?? finalMs)} · Beat my time: {formatMs(GHOST_MS)}
-          </p>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
-            {finalMs < GHOST_MS ? "You beat my time." : "Still chasing my time."}
-          </p>
-          <button
-            type="button"
-            onClick={startGame}
-            className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
-          >
-            Play again
-          </button>
-        </div>
-      )}
+            {roundClear ? (
+              <p className="mt-8 text-center font-mono text-sm uppercase tracking-[0.2em] text-markup">
+                Round clear
+              </p>
+            ) : (
+              <div className="mt-4 grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
+                {board.map((ticket) => {
+                  const isFound = found.has(ticket.id);
+                  const isFlashing = flashId === ticket.id;
+                  return (
+                    <button
+                      key={ticket.id}
+                      type="button"
+                      onClick={() => handleTicketClick(ticket)}
+                      disabled={isFound}
+                      className={cn(
+                        "flex flex-col items-start gap-0.5 border px-1.5 py-1 text-left font-mono text-[9px] transition-colors",
+                        isFound &&
+                          "border-border bg-background text-muted-foreground/40 line-through",
+                        isFlashing && "border-destructive bg-destructive/10 text-destructive",
+                        !isFound &&
+                          !isFlashing &&
+                          "border-border bg-background text-foreground/85 hover:border-primary",
+                      )}
+                    >
+                      <span>{ticket.id}</span>
+                      {round.mode === "priority" ? (
+                        <span
+                          className={cn(
+                            round.showPriorityColor && ticket.priority === "P0"
+                              ? "text-markup"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          {ticket.priority}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">{ticket.assignee}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {phase === "finished" && finalMs !== null && (
+          <div>
+            <p className="font-mono text-2xl text-foreground">{formatMs(finalMs)}</p>
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+              Your best: {formatMs(bestMs ?? finalMs)} · Beat my time: {formatMs(GHOST_MS)}
+            </p>
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary">
+              {finalMs < GHOST_MS ? "You beat my time." : "Still chasing my time."}
+            </p>
+            <button
+              type="button"
+              onClick={startGame}
+              className="mt-6 border border-border bg-background px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary"
+            >
+              Play again
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
