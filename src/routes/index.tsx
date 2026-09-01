@@ -190,6 +190,32 @@ function IconButton({
   );
 }
 
+// The img-to-text.virag.fun mark: two drafting corner-ticks framing the "#"
+// from that app's own ASCII ramp. Brackets stay markup-orange (the fixed
+// brand accent); the glyph rides currentColor so it recolors on hover
+// alongside the label, matching IconButton's other icons.
+function AsciiArtMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className}>
+      <g stroke="var(--markup)" strokeWidth={2.4} fill="none">
+        <path d="M2,12 V2 H12" />
+        <path d="M20,30 H30 V20" />
+      </g>
+      <text
+        x="16"
+        y="22"
+        textAnchor="middle"
+        fontFamily="var(--font-mono)"
+        fontWeight={700}
+        fontSize={16}
+        fill="currentColor"
+      >
+        #
+      </text>
+    </svg>
+  );
+}
+
 function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
   return (
     <section id="profile" className="scroll-mt-24 pt-14 sm:pt-20">
@@ -438,8 +464,9 @@ function Beyond({ cv }: { cv: CvData }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Open the image-to-ASCII tool"
-                className="block border border-border bg-blueprint-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-primary"
+                className="flex items-center gap-2 border border-border bg-card px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               >
+                <AsciiArtMark className="h-3.5 w-3.5" />
                 ASCII Art
               </a>
             </li>
