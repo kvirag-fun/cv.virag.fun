@@ -51,6 +51,8 @@ const SECTIONS: NavSection[] = [
   { id: "beyond", index: "05", label: "Beyond work" },
 ];
 
+const ASCII_ART_URL = "https://img-to-text.virag.fun";
+
 function CvPage() {
   const [unlocked, setUnlocked] = useState<UnlockedCv | null>(null);
   const [checked, setChecked] = useState(false);
@@ -116,6 +118,14 @@ function CvPage() {
               compact
             />
           )}
+          <IconLinkButton
+            icon={AsciiArtMark}
+            label="ASCII Art"
+            title="Open the image-to-ASCII tool"
+            href={ASCII_ART_URL}
+            hoverClassName="hover:border-primary hover:text-primary"
+            compact
+          />
         </div>
       </header>
 
@@ -148,6 +158,13 @@ function CvPage() {
                   hoverClassName="hover:border-markup hover:text-markup"
                 />
               )}
+              <IconLinkButton
+                icon={AsciiArtMark}
+                label="ASCII Art"
+                title="Open the image-to-ASCII tool"
+                href={ASCII_ART_URL}
+                hoverClassName="hover:border-primary hover:text-primary"
+              />
             </div>
           </div>
         </footer>
@@ -185,6 +202,65 @@ function IconButton({
       <Icon className="h-3.5 w-3.5" aria-hidden="true" />
       {label}
     </button>
+  );
+}
+
+// The img-to-text.virag.fun mark: two drafting corner-ticks framing the "#"
+// from that app's own ASCII ramp. Brackets stay markup-orange (the fixed
+// brand accent); the glyph rides currentColor so it recolors on hover
+// alongside the label, matching IconButton's other icons.
+function AsciiArtMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className}>
+      <g stroke="var(--markup)" strokeWidth={2.4} fill="none">
+        <path d="M2,12 V2 H12" />
+        <path d="M20,30 H30 V20" />
+      </g>
+      <text
+        x="16"
+        y="22"
+        textAnchor="middle"
+        fontFamily="var(--font-mono)"
+        fontWeight={700}
+        fontSize={16}
+        fill="currentColor"
+      >
+        #
+      </text>
+    </svg>
+  );
+}
+
+function IconLinkButton({
+  icon: Icon,
+  label,
+  title,
+  href,
+  hoverClassName,
+  compact,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  title: string;
+  href: string;
+  hoverClassName: string;
+  compact?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={title}
+      className={cn(
+        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors",
+        hoverClassName,
+        compact ? "px-2.5 py-1.5" : "px-3 py-2",
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      {label}
+    </a>
   );
 }
 
