@@ -118,14 +118,6 @@ function CvPage() {
               compact
             />
           )}
-          <IconLinkButton
-            icon={AsciiArtMark}
-            label="ASCII Art"
-            title="Open the image-to-ASCII tool"
-            href={ASCII_ART_URL}
-            hoverClassName="hover:border-primary hover:text-primary"
-            compact
-          />
         </div>
       </header>
 
@@ -158,13 +150,6 @@ function CvPage() {
                   hoverClassName="hover:border-markup hover:text-markup"
                 />
               )}
-              <IconLinkButton
-                icon={AsciiArtMark}
-                label="ASCII Art"
-                title="Open the image-to-ASCII tool"
-                href={ASCII_ART_URL}
-                hoverClassName="hover:border-primary hover:text-primary"
-              />
             </div>
           </div>
         </footer>
@@ -228,39 +213,6 @@ function AsciiArtMark({ className }: { className?: string }) {
         #
       </text>
     </svg>
-  );
-}
-
-function IconLinkButton({
-  icon: Icon,
-  label,
-  title,
-  href,
-  hoverClassName,
-  compact,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  title: string;
-  href: string;
-  hoverClassName: string;
-  compact?: boolean;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={title}
-      className={cn(
-        "flex items-center gap-2 border border-border bg-card font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground transition-colors",
-        hoverClassName,
-        compact ? "px-2.5 py-1.5" : "px-3 py-2",
-      )}
-    >
-      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-      {label}
-    </a>
   );
 }
 
@@ -506,6 +458,18 @@ function Beyond({ cv }: { cv: CvData }) {
                 {tag}
               </li>
             ))}
+            <li>
+              <a
+                href={ASCII_ART_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open the image-to-ASCII tool"
+                className="flex items-center gap-1.5 border border-border bg-blueprint-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-primary transition-colors hover:border-primary hover:text-markup"
+              >
+                <AsciiArtMark className="h-3 w-3" />
+                ASCII Art
+              </a>
+            </li>
           </ul>
         </div>
       </Reveal>
