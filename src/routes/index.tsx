@@ -129,7 +129,7 @@ function CvPage() {
         <footer className="mt-20 border-t border-border pt-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              {cv.name} · {cv.location} · {new Date().getFullYear()}
+              {cv.name} · {cv.title} · {cv.location} · {new Date().getFullYear()}
             </p>
             <div className="no-print flex items-center gap-2">
               <IconButton
