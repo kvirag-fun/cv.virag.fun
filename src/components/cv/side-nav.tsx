@@ -22,12 +22,15 @@ export function SideNav({ sections }: SideNavProps) {
     // so compute the active section directly from scroll position instead —
     // the standard scrollspy approach: the last section whose top has
     // crossed a fixed trigger line is the active one.
+    const elements = sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => el !== null);
+
     function updateActive() {
       const triggerY = window.innerHeight * 0.35;
       let currentId = sections[0]?.id ?? "";
-      for (const s of sections) {
-        const el = document.getElementById(s.id);
-        if (el && el.getBoundingClientRect().top <= triggerY) currentId = s.id;
+      for (const el of elements) {
+        if (el.getBoundingClientRect().top <= triggerY) currentId = el.id;
       }
 
       // The last section can be shorter than the page's remaining scroll
@@ -40,12 +43,24 @@ export function SideNav({ sections }: SideNavProps) {
       setActive(currentId);
     }
 
+    // Coalesce to at most one scan per animation frame — scroll fires far
+    // more often than the page can repaint during a fling.
+    let ticking = false;
+    function onScrollOrResize() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateActive();
+        ticking = false;
+      });
+    }
+
     updateActive();
-    window.addEventListener("scroll", updateActive, { passive: true });
-    window.addEventListener("resize", updateActive);
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
     return () => {
-      window.removeEventListener("scroll", updateActive);
-      window.removeEventListener("resize", updateActive);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
     };
   }, [sections]);
 
@@ -67,7 +82,9 @@ export function SideNav({ sections }: SideNavProps) {
                 <span
                   className={cn(
                     "font-mono text-[10px] tracking-widest transition-colors",
-                    isActive ? "text-markup" : "text-muted-foreground/60 group-hover:text-foreground",
+                    isActive
+                      ? "text-markup"
+                      : "text-muted-foreground/60 group-hover:text-foreground",
                   )}
                 >
                   {s.index}
@@ -75,13 +92,17 @@ export function SideNav({ sections }: SideNavProps) {
                 <span
                   className={cn(
                     "h-px transition-all duration-300",
-                    isActive ? "w-10 bg-markup" : "w-5 bg-border group-hover:w-8 group-hover:bg-foreground/40",
+                    isActive
+                      ? "w-10 bg-markup"
+                      : "w-5 bg-border group-hover:w-8 group-hover:bg-foreground/40",
                   )}
                 />
                 <span
                   className={cn(
                     "font-mono text-[11px] uppercase tracking-[0.2em] transition-colors",
-                    isActive ? "text-foreground" : "text-muted-foreground/60 group-hover:text-foreground",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground/60 group-hover:text-foreground",
                   )}
                 >
                   {s.label}
