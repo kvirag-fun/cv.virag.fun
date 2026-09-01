@@ -1,0 +1,3 @@
+[submodule "vendor/blueprint-framework"]
+	path = vendor/blueprint-framework
+	url = https://github.com/kvirag-fun/virag.fun_blueprint_framework
