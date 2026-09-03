@@ -36,6 +36,7 @@ export interface CvData {
   location: string;
   email: string;
   phone: string;
+  linkedin?: string;
   birthDate: string;
   about: string[];
   experience: ExperienceItem[];
