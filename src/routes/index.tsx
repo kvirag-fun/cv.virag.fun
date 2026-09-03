@@ -14,6 +14,7 @@ import {
   Lock,
   Printer,
   ArrowUpRight,
+  Linkedin,
 } from "lucide-react";
 import { clearUnlocked, loadUnlocked, IS_OPEN, type UnlockedCv } from "@/lib/crypto";
 import type { CvData } from "@/lib/cv-types";
@@ -250,6 +251,9 @@ function Hero({ cv, portraitUrl }: { cv: CvData; portraitUrl: string }) {
               />
               <ContactChip icon={MapPin} label={cv.location} />
               <ContactChip icon={Cake} label={cv.birthDate} />
+              {cv.linkedin && (
+                <ContactChip icon={Linkedin} label="LinkedIn" href={cv.linkedin} external />
+              )}
             </ul>
           </Reveal>
         </div>
@@ -285,10 +289,12 @@ function ContactChip({
   icon: Icon,
   label,
   href,
+  external,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   href?: string;
+  external?: boolean;
 }) {
   const className =
     "flex items-center gap-2 border border-border bg-card px-3 py-1.5 font-mono text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary";
@@ -302,7 +308,11 @@ function ContactChip({
   return (
     <li>
       {href ? (
-        <a href={href} className={className}>
+        <a
+          href={href}
+          className={className}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
           {content}
         </a>
       ) : (
