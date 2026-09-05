@@ -184,11 +184,11 @@ function AsciiArtMark({ className }: { className?: string }) {
       </g>
       <text
         x="16"
-        y="23"
+        y="24"
         textAnchor="middle"
         fontFamily="var(--font-mono)"
         fontWeight={700}
-        fontSize={20}
+        fontSize={24}
         fill="currentColor"
       >
         #
