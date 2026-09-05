@@ -130,29 +130,9 @@ function CvPage() {
         <Beyond cv={cv} />
 
         <footer className="mt-20 border-t border-border pt-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              {cv.name} · {cv.title} · {cv.location} · {new Date().getFullYear()}
-            </p>
-            <div className="no-print flex items-center gap-2">
-              <IconButton
-                icon={Printer}
-                label="Print"
-                title="Print this page"
-                onClick={() => window.print()}
-                hoverClassName="hover:border-primary hover:text-primary"
-              />
-              {!IS_OPEN && (
-                <IconButton
-                  icon={Lock}
-                  label="Lock"
-                  title="Lock this page"
-                  onClick={onLock}
-                  hoverClassName="hover:border-markup hover:text-markup"
-                />
-              )}
-            </div>
-          </div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            {cv.name} · {cv.title} · {cv.location} · {new Date().getFullYear()}
+          </p>
         </footer>
       </main>
     </div>
